@@ -232,22 +232,94 @@
                 <!-- PANEL DE ADMINISTRADOR -->
                 <div id="admin-panel" class="hidden" style="margin-top:1.5rem;">
                     
+                    <!-- 1. GESTOR DE TEXTOS E INFORMACIÓN -->
                     <div class="admin-section">
-                        <h3>Modificar Assets</h3>
-                        <input type="text" id="asset-key" placeholder="Nombre de asset (ej: calendary.png, moderator.png)" style="margin-bottom:8px;">
-                        <input type="text" id="asset-url" placeholder="Nueva Ruta o URL de la imagen">
-                        <button class="btn-action" id="btn-admin-asset">Actualizar Asset</button>
+                        <h3>Gestor de Textos e Información</h3>
+                        
+                        <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">
+                            Seleccionar sección / elemento específico:
+                        </label>
+                        <select id="admin-info-target" style="width:100%; margin-bottom:12px;">
+                            <option value="header_main">Encabezado Principal (GD Promoted History)</option>
+                            <option value="header_sub">Subtítulo Encabezado (Introducción / Secciones)</option>
+                            <option value="intro_about_title">Pestaña Intro: Título "Acerca del Documento"</option>
+                            <option value="intro_about_desc">Pestaña Intro: Descripción "Acerca del Documento"</option>
+                            <option value="intro_gk_title">Pestaña Intro: Título "GD Gatekeepers"</option>
+                            <option value="tab_fechas_desc">Pestaña Fechas: Descripción de ayuda</option>
+                            <option value="tab_roles_desc">Pestaña Roles: Descripción de filtrado</option>
+                            <option value="tab_country_desc">Pestaña Nacionalidad: Descripción de ayuda</option>
+                            <option value="tab_search_desc">Pestaña Buscador: Placeholder / Instrucción</option>
+                        </select>
+
+                        <div id="admin-info-fields">
+                            <label id="lbl-admin-info-text" style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Contenido actual:</label>
+                            <textarea id="admin-info-text" placeholder="Escribe el nuevo texto o contenido..." style="width:100%; min-height:90px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid var(--border-glow); padding:0.8rem; margin-bottom:12px; font-family:inherit;"></textarea>
+                        </div>
+
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-action" id="btn-admin-info-save">Guardar Cambios</button>
+                            <button class="btn-action btn-secondary" id="btn-admin-info-reset">Restablecer</button>
+                            <button class="btn-action btn-danger" id="btn-admin-info-clear">Vaciar Texto</button>
+                        </div>
                     </div>
 
+                    <!-- 2. MODIFICAR ASSETS / ICONOS (NUEVO SELECTOR CUSTOM) -->
                     <div class="admin-section">
-                        <h3>Modificar Info</h3>
-                        <input type="text" id="admin-info-title" placeholder="Nuevo Título Principal" style="margin-bottom:8px;">
-                        <input type="text" id="admin-info-subtitle" placeholder="Nuevo Subtítulo" style="margin-bottom:8px;">
-                        <textarea id="admin-info-desc" placeholder="Nueva Descripción de Introducción" style="width:100%; background:rgba(0,0,0,0.6); color:#fff; border:1px solid var(--border-glow); padding:0.8rem; margin-bottom:8px;"></textarea>
-                        <button class="btn-action" id="btn-admin-info">Guardar Información</button>
+                        <h3>Modificar Assets / Iconos</h3>
+                        
+                        <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">
+                            Seleccionar asset a reemplazar:
+                        </label>
+                        
+                        <div class="role-selector-container" style="margin-bottom:12px;">
+                            <div class="role-selector-wrapper" style="width:100%;">
+                                <button type="button" class="btn-role-trigger" id="btn-trigger-asset-select" data-selected-asset="moderator.png" style="width:100%; justify-content:flex-start; gap:10px; padding:8px 12px;">
+                                    <img src="assets/moderator.png" alt="Asset" id="img-selected-asset" class="badge-img">
+                                    <span id="lbl-selected-asset" style="font-family:var(--font-heading); color:#fff;">moderator.png</span>
+                                </button>
+
+                                <div class="role-options-popup hidden" id="popup-asset-select" style="width:100%; max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; padding:6px;">
+                                    <button type="button" class="asset-option-btn" data-asset="moderator.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
+                                        <img src="assets/moderator.png" class="badge-img" alt="moderator.png">
+                                        <span>moderator.png</span>
+                                    </button>
+                                    <button type="button" class="asset-option-btn" data-asset="rating_advisor.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
+                                        <img src="assets/rating_advisor.png" class="badge-img" alt="rating_advisor.png">
+                                        <span>rating_advisor.png</span>
+                                    </button>
+                                    <button type="button" class="asset-option-btn" data-asset="leaderboard_Mod.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
+                                        <img src="assets/leaderboard_Mod.png" class="badge-img" alt="leaderboard_Mod.png">
+                                        <span>leaderboard_Mod.png</span>
+                                    </button>
+                                    <button type="button" class="asset-option-btn" data-asset="ex_rating_advisor.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
+                                        <img src="assets/ex_rating_advisor.png" class="badge-img" alt="ex_rating_advisor.png" onerror="this.onerror=null; this.src='assets/rating_advisor.png';">
+                                        <span>ex_rating_advisor.png</span>
+                                    </button>
+                                    <button type="button" class="asset-option-btn" data-asset="calendary.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
+                                        <img src="assets/calendary.png" class="badge-img" alt="calendary.png">
+                                        <span>calendary.png</span>
+                                    </button>
+                                    <button type="button" class="asset-option-btn" data-asset="country.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
+                                        <img src="assets/country.png" class="badge-img" alt="country.png">
+                                        <span>country.png</span>
+                                    </button>
+                                    <button type="button" class="asset-option-btn" data-asset="search.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
+                                        <img src="assets/search.png" class="badge-img" alt="search.png">
+                                        <span>search.png</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="text" id="admin-asset-url" placeholder="Nueva Ruta local o URL (ej: assets/nuevo_icon.png)">
+                        
+                        <div style="display:flex; gap:8px; margin-top:12px;">
+                            <button class="btn-action" id="btn-admin-asset-save">Actualizar Asset</button>
+                            <button class="btn-action btn-secondary" id="btn-admin-asset-reset">Restablecer Asset</button>
+                        </div>
                     </div>
 
-                    <!-- MODIFICAR MIEMBRO (CON 5 INSIGNIAS) -->
+                    <!-- 3. MODIFICAR MIEMBRO -->
                     <div class="admin-section">
                         <h3>Modificar Miembro</h3>
                         <input type="text" id="edit-member-id" placeholder="ID del Usuario a modificar" style="margin-bottom:8px;">
@@ -283,7 +355,7 @@
                         <button class="btn-action" id="btn-admin-edit">Aplicar Cambios</button>
                     </div>
 
-                    <!-- AGREGAR MIEMBRO (CON 3 INSIGNIAS) -->
+                    <!-- 4. AGREGAR MIEMBRO -->
                     <div class="admin-section">
                         <h3>Agregar Miembro</h3>
                         
@@ -314,7 +386,7 @@
                         <button class="btn-action" id="btn-admin-add">Agregar Nuevo Registro</button>
                     </div>
 
-                    <!-- ELIMINAR MIEMBRO -->
+                    <!-- 5. ELIMINAR MIEMBRO -->
                     <div class="admin-section">
                         <h3>Eliminar Miembro / Registro</h3>
                         <input type="text" id="delete-member-id" placeholder="ID del Usuario o Registro a eliminar" style="margin-bottom:8px;">
