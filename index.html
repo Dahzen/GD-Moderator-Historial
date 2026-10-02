@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GD Promoted History</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-dark">
+
+    <!-- ENCABEZADO Y PESTAÑAS SUPERIORES -->
+    <header class="navbar-header">
+        <nav class="nav-container">
+            <!-- 1. Fechas -->
+            <div class="dropdown">
+                <button class="nav-btn" id="btn-fechas" data-tab="tab-fechas">
+                    <img src="assets/calendary.png" class="icon-small" alt="Calendario" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2300f0ff\'><path d=\'M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z\'/></svg>';">
+                    <span>Fechas</span>
+                </button>
+                <div class="dropdown-content">
+                    <a href="#" data-filter-year="all">All</a>
+                    <a href="#" data-filter-year="2018">2018</a>
+                    <a href="#" data-filter-year="2019">2019</a>
+                    <a href="#" data-filter-year="2020">2020</a>
+                    <a href="#" data-filter-year="2021">2021</a>
+                    <a href="#" data-filter-year="2022">2022</a>
+                    <a href="#" data-filter-year="2023">2023</a>
+                    <a href="#" data-filter-year="2024">2024</a>
+                    <a href="#" data-filter-year="2025">2025</a>
+                    <a href="#" data-filter-year="2026">2026</a>
+                </div>
+            </div>
+
+            <!-- 2. Roles -->
+            <div class="dropdown">
+                <button class="nav-btn" id="btn-roles" data-tab="tab-roles">
+                    <img src="assets/rating_advisor.png" class="icon-small" alt="Roles">
+                    <span>Roles</span>
+                </button>
+                <div class="dropdown-content">
+                    <a href="#" data-filter-role="all">
+                        <img src="assets/country.png" class="icon-small" style="margin-right: 6px;" alt="All">all
+                    </a>
+                    <a href="#" data-filter-role="Rating Advisor">
+                        <img src="assets/rating_advisor.png" class="icon-small" style="margin-right: 6px;" alt="Rating Advisor">Rating Advisor
+                    </a>
+                    <a href="#" data-filter-role="Moderator">
+                        <img src="assets/moderator.png" class="icon-small" style="margin-right: 6px;" alt="Moderator">Moderator
+                    </a>
+                    <a href="#" data-filter-role="Leaderboard Mod">
+                        <img src="assets/leaderboard_Mod.png" class="icon-small" style="margin-right: 6px;" alt="Leaderboard Mod">Leaderboard Mod
+                    </a>
+                </div>
+            </div>
+
+            <!-- 3. Nacionalidad -->
+            <button class="nav-btn" id="btn-nacionalidad" data-tab="tab-nacionalidad">
+                <img src="assets/country.png" class="icon-small" alt="Nacionalidad">
+                <span>Nacionalidad</span>
+            </button>
+
+            <!-- 4. Buscador -->
+            <button class="nav-btn" id="btn-buscador" data-tab="tab-buscador">
+                <img src="assets/search.png" class="icon-small" alt="Buscador">
+                <span>Buscador</span>
+            </button>
+
+            <!-- 5. Otros -->
+            <button class="nav-btn" id="btn-otros" data-tab="tab-otros">
+                <img src="assets/other.png" class="icon-small" alt="Otros">
+                <span>Otros</span>
+            </button>
+
+            <!-- 6. Ajustes -->
+            <button class="nav-btn" id="btn-ajustes" data-tab="tab-ajustes">
+                <img src="assets/settings.png" class="icon-small" alt="Ajustes">
+                <span>Ajustes</span>
+            </button>
+        </nav>
+
+        <div class="header-titles">
+            <h1 class="main-title" id="display-title">GD Promoted History</h1>
+            <h2 class="sub-title" id="display-subtitle">Introducción</h2>
+        </div>
+    </header>
+
+    <main class="main-content">
+
+        <!-- PESTAÑA: INTRODUCCIÓN -->
+        <section id="tab-intro" class="tab-pane active">
+            <article class="content-card">
+                <h3>Acerca del Documento</h3>
+                <p id="desc-intro">Este proyecto recopila y organiza el historial completo de promociones y degradaciones dentro de la comunidad de moderación de Geometry Dash. Aquí podrás consultar registros detallados por año, mes, rol y nacionalidad de cada moderador.</p>
+            </article>
+
+            <section class="content-card">
+                <h2>GD Gatekeepers</h2>
+                
+                <div class="gk-group">
+                    <h3>Moderators</h3>
+                    <div class="gk-list" id="gk-list-moderators"></div>
+                </div>
+
+                <div class="gk-group">
+                    <h3>Rating Advisors</h3>
+                    <div class="gk-list" id="gk-list-advisors"></div>
+                </div>
+
+                <div class="gk-group">
+                    <h3>Leaderboard Moderators</h3>
+                    <div class="gk-list" id="gk-list-lbmods"></div>
+                </div>
+            </section>
+        </section>
+
+        <!-- PESTAÑA: FECHAS -->
+        <section id="tab-fechas" class="tab-pane">
+            <article class="content-card">
+                <h2>Fechas</h2>
+                <p id="desc-fechas">Historial cronológico estructurado por Años, Meses y Días. Utiliza el botón interactivo para filtrar entre ascensos, descensos o ver el registro completo.</p>
+                <select onchange="import('./js/ui.js').then(m => m.setDatesOrder(this.value))">
+                    <option value="desc">Más reciente a más antiguo</option>
+                    <option value="asc">Más antiguo a más reciente</option>
+                </select>
+                <button id="btn-toggle-fechas-mode" class="filter-btn-toggle">
+                    <img id="img-toggle-fechas" src="assets/rating_advisor.png" class="badge-img" alt="Filtro">
+                    <span id="label-toggle-fechas">Ver solo Ascensos</span>
+                </button>
+            </article>
+
+            <div id="fechas-timeline-container"></div>
+        </section>
+
+        <!-- PESTAÑA: ROLES -->
+        <section id="tab-roles" class="tab-pane">
+            <article class="content-card">
+                <h2>Filtrado por Roles</h2>
+                <div id="old-badge-wrapper" class="hidden" style="margin-top: 1rem;">
+                    <button id="btn-toggle-old-badge" class="filter-btn-toggle">
+                        <img id="img-old-badge-toggle" src="assets/old_badge.png" class="badge-img" alt="Old Badge" onerror="this.onerror=null; this.src='assets/rating_advisor.png';">
+                        <span id="lbl-old-badge-toggle">Ver con Insignia Antigua</span>
+                    </button>
+                </div>
+            </article>
+
+            <div id="roles-timeline-container"></div>
+        </section>
+
+        <!-- PESTAÑA: NACIONALIDAD -->
+        <section id="tab-nacionalidad" class="tab-pane">
+            <article class="content-card">
+                <h2>Nacionalidades</h2>
+                <p>Selecciona un país para ver los ascensos y descensos registrados en esa región:</p>
+                <div id="country-grid" class="country-grid"></div>
+            </article>
+
+            <div id="country-timeline-container"></div>
+        </section>
+
+        <!-- PESTAÑA: BUSCADOR -->
+        <section id="tab-buscador" class="tab-pane">
+            <article class="content-card">
+                <h2>Buscador de Moderadores</h2>
+                <input type="text" id="search-input" placeholder="Buscar por Nombre Actual, Nombre Antiguo o ID de Cuenta...">
+            </article>
+
+            <div id="search-results-container"></div>
+        </section>
+
+        <!-- PESTAÑA: OTROS -->
+        <section id="tab-otros" class="tab-pane">
+            <article class="content-card">
+                <h2>Estadísticas Generales</h2>
+                <div style="display:flex; gap:1rem; margin-top:1rem;">
+                    <div style="flex:1; background:rgba(0,0,0,0.5); padding:1rem; border-left:3px solid var(--accent-green);">
+                        <h3 style="margin:0;">Total Ascensos</h3>
+                        <p id="stat-total-promotes" style="font-size:2rem; font-family:var(--font-heading); margin:0; color:var(--accent-green);">0</p>
+                    </div>
+                    <div style="flex:1; background:rgba(0,0,0,0.5); padding:1rem; border-left:3px solid var(--accent-red);">
+                        <h3 style="margin:0;">Total Descensos</h3>
+                        <p id="stat-total-demotes" style="font-size:2rem; font-family:var(--font-heading); margin:0; color:var(--accent-red);">0</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="content-card">
+                <h2>Ritmo por Año</h2>
+                <div id="stats-yearly-breakdown"></div>
+            </article>
+        </section>
+
+        <!-- PESTAÑA: AJUSTES -->
+        <section id="tab-ajustes" class="tab-pane">
+            <article class="content-card">
+                <h2>Ajustes Estéticos</h2>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label>Tamaño de Letra:</label>
+                    <select id="select-font-size">
+                        <option value="16px">Pequeña (16px)</option>
+                        <option value="18px" selected>Normal (18px)</option>
+                        <option value="20px">Grande (20px)</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label>Tema Visual:</label>
+                    <select id="select-theme">
+                        <option value="dark">Modo Geometry Dash (Oscuro)</option>
+                        <option value="light">Modo Claro</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label>Tipografía:</label>
+                    <select id="select-font-family">
+                        <option value="'Rajdhani', sans-serif">Rajdhani (Por defecto)</option>
+                        <option value="'Orbitron', sans-serif">Orbitron (Futurista)</option>
+                        <option value="Arial, sans-serif">Arial (Estándar)</option>
+                    </select>
+                </div>
+
+                <hr style="border-color:var(--border-glow); margin:2rem 0;">
+
+                <!-- SWITCH TOGGLE PARA MODO ADMIN -->
+                <label class="switch-container">
+                    <input type="checkbox" id="toggle-admin-switch">
+                    <span class="switch-slider"></span>
+                    <span class="switch-label">Habilitar Modo Admin</span>
+                </label>
+
+                <!-- PANEL DE ADMINISTRADOR -->
+                <div id="admin-panel" class="hidden" style="margin-top:1.5rem;">
+                    
+                    <div class="admin-section">
+                        <h3>Modificar Assets</h3>
+                        <input type="text" id="asset-key" placeholder="Nombre de asset (ej: calendary.png, moderator.png)" style="margin-bottom:8px;">
+                        <input type="text" id="asset-url" placeholder="Nueva Ruta o URL de la imagen">
+                        <button class="btn-action" id="btn-admin-asset">Actualizar Asset</button>
+                    </div>
+
+                    <div class="admin-section">
+                        <h3>Modificar Info</h3>
+                        <input type="text" id="admin-info-title" placeholder="Nuevo Título Principal" style="margin-bottom:8px;">
+                        <input type="text" id="admin-info-subtitle" placeholder="Nuevo Subtítulo" style="margin-bottom:8px;">
+                        <textarea id="admin-info-desc" placeholder="Nueva Descripción de Introducción" style="width:100%; background:rgba(0,0,0,0.6); color:#fff; border:1px solid var(--border-glow); padding:0.8rem; margin-bottom:8px;"></textarea>
+                        <button class="btn-action" id="btn-admin-info">Guardar Información</button>
+                    </div>
+
+                    <!-- MODIFICAR MIEMBRO (CON 5 INSIGNIAS) -->
+                    <div class="admin-section">
+                        <h3>Modificar Miembro</h3>
+                        <input type="text" id="edit-member-id" placeholder="ID del Usuario a modificar" style="margin-bottom:8px;">
+                        <input type="text" id="edit-member-newname" placeholder="Nuevo Nombre (Opcional)" style="margin-bottom:8px;">
+                        
+                        <div class="role-selector-container" style="margin-bottom:8px;">
+                            <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Cambiar Rol (Opcional):</label>
+                            <div class="role-selector-wrapper">
+                                <button type="button" class="btn-role-trigger" id="btn-trigger-edit-role" data-selected-role="">
+                                    <img src="assets/rating_advisor.png" alt="Rol Seleccionado" id="img-selected-edit-role">
+                                </button>
+                                <div class="role-options-popup hidden" id="popup-edit-role">
+                                    <button type="button" class="role-option-btn" data-role="Rating Advisor" title="Rating Advisor">
+                                        <img src="assets/rating_advisor.png" alt="Rating Advisor">
+                                    </button>
+                                    <button type="button" class="role-option-btn" data-role="Moderator" title="Moderator">
+                                        <img src="assets/moderator.png" alt="Moderator">
+                                    </button>
+                                    <button type="button" class="role-option-btn" data-role="Leaderboard Mod" title="Leaderboard Mod">
+                                        <img src="assets/leaderboard_Mod.png" alt="Leaderboard Mod">
+                                    </button>
+                                    <button type="button" class="role-option-btn" data-role="Ex Rating Advisor" title="Ex Rating Advisor">
+                                        <img src="assets/ex_rating_advisor.png" alt="Ex Rating Advisor" onerror="this.onerror=null; this.src='assets/rating_advisor.png';">
+                                    </button>
+                                    <button type="button" class="role-option-btn" data-role="Ex Moderator" title="Ex Moderator">
+                                        <img src="assets/ex_moderator.png" alt="Ex Moderator" onerror="this.onerror=null; this.src='assets/moderator.png';">
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="datetime-local" id="edit-member-date" style="margin-bottom:8px;">
+                        <button class="btn-action" id="btn-admin-edit">Aplicar Cambios</button>
+                    </div>
+
+                    <!-- AGREGAR MIEMBRO (CON 3 INSIGNIAS) -->
+                    <div class="admin-section">
+                        <h3>Agregar Miembro</h3>
+                        
+                        <div class="role-selector-container" style="margin-bottom:8px;">
+                            <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Seleccionar Rol:</label>
+                            <div class="role-selector-wrapper">
+                                <button type="button" class="btn-role-trigger" id="btn-trigger-add-role" data-selected-role="Rating Advisor">
+                                    <img src="assets/rating_advisor.png" alt="Rol Seleccionado" id="img-selected-add-role">
+                                </button>
+                                <div class="role-options-popup hidden" id="popup-add-role">
+                                    <button type="button" class="role-option-btn active" data-role="Rating Advisor" title="Rating Advisor">
+                                        <img src="assets/rating_advisor.png" alt="Rating Advisor">
+                                    </button>
+                                    <button type="button" class="role-option-btn" data-role="Moderator" title="Moderator">
+                                        <img src="assets/moderator.png" alt="Moderator">
+                                    </button>
+                                    <button type="button" class="role-option-btn" data-role="Leaderboard Mod" title="Leaderboard Mod">
+                                        <img src="assets/leaderboard_Mod.png" alt="Leaderboard Mod">
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="text" id="add-name" placeholder="Nombre de Usuario" style="margin-bottom:8px;">
+                        <input type="text" id="add-id" placeholder="ID de Usuario" style="margin-bottom:8px;">
+                        <input type="datetime-local" id="add-date" style="margin-bottom:8px;">
+                        <input type="text" id="add-country" placeholder="País / Nacionalidad" style="margin-bottom:8px;">
+                        <button class="btn-action" id="btn-admin-add">Agregar Nuevo Registro</button>
+                    </div>
+
+                    <!-- ELIMINAR MIEMBRO -->
+                    <div class="admin-section">
+                        <h3>Eliminar Miembro / Registro</h3>
+                        <input type="text" id="delete-member-id" placeholder="ID del Usuario o Registro a eliminar" style="margin-bottom:8px;">
+                        <button class="btn-action btn-danger" id="btn-admin-delete">Eliminar Registro</button>
+                    </div>
+
+                </div>
+            </article>
+        </section>
+
+    </main>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

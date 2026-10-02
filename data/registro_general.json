@@ -1,0 +1,16 @@
+[
+  {
+    "id": "7560014",
+    "name": "Agdor",
+    "oldNames": ["Magdor"],
+    "role": "Rating Advisor",
+    "status": "activo"
+  },
+  {
+    "id": "9999999",
+    "name": "TesterUser",
+    "oldNames": ["OldTester"],
+    "role": "Moderator",
+    "status": "activo"
+  }
+]

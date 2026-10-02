@@ -1,0 +1,52 @@
+[
+  {
+    "id": "7560014",
+    "user": "Agdor",
+    "year": "2021",
+    "month": "Junio",
+    "day": "24",
+    "dateStr": "24/06/2021 18:38",
+    "role": "Moderator",
+    "type": "promote"
+  },
+  {
+    "id": "7560014",
+    "user": "Agdor",
+    "year": "2022",
+    "month": "Marzo",
+    "day": "07",
+    "dateStr": "07/03/2022 11:19",
+    "role": "Rating Advisor",
+    "type": "promote"
+  },
+  {
+    "id": "9999999",
+    "user": "TesterUser",
+    "year": "2023",
+    "month": "Enero",
+    "day": "15",
+    "dateStr": "15/01/2023 12:00",
+    "role": "Moderator",
+    "type": "promote"
+  },
+  {
+    "id": "9999999",
+    "user": "TesterUser",
+    "year": "2024",
+    "month": "Junio",
+    "day": "10",
+    "dateStr": "10/06/2024 15:30",
+    "role": "Rating Advisor",
+    "type": "promote"
+  },
+  {
+    "id": "9999999",
+    "user": "TesterUser",
+    "year": "2025",
+    "month": "Enero",
+    "day": "01",
+    "dateStr": "01/01/2025 00:00",
+    "role": "Moderator",
+    "type": "demote"
+  }
+]
