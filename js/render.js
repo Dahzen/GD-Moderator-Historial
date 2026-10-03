@@ -45,7 +45,7 @@ function groupRecordsByDate(records) {
     return grouped;
 }
 
-export function renderFechasTimeline(container, records, order = 'desc') {
+export function renderFechasTimeline(container, records, order = 'desc', isAdmin = false) {
     container.innerHTML = '';
 
     if (!records || records.length === 0) {
@@ -55,7 +55,6 @@ export function renderFechasTimeline(container, records, order = 'desc') {
 
     const grouped = groupRecordsByDate(records);
 
-    // Ordenar los años según la preferencia 'desc' o 'asc'
     const sortedYears = Object.keys(grouped).sort((a, b) => {
         return order === 'desc' ? Number(b) - Number(a) : Number(a) - Number(b);
     });
@@ -80,10 +79,25 @@ export function renderFechasTimeline(container, records, order = 'desc') {
                     const recordEl = document.createElement('div');
                     recordEl.className = `record-item ${isPromote ? 'record-promote' : 'record-demote'}`;
 
+                    let adminBtns = '';
+                    if (isAdmin) {
+                        adminBtns = `
+                            <div class="admin-card-actions">
+                                <button class="btn-card-action btn-edit-record" data-id="${item.id}" title="Editar Registro">
+                                    <img src="assets/edited.png" alt="Editar">
+                                </button>
+                                <button class="btn-card-action btn-delete-record" data-id="${item.id}" title="Eliminar Registro">
+                                    <img src="assets/delete.png" alt="Eliminar">
+                                </button>
+                            </div>
+                        `;
+                    }
+
                     recordEl.innerHTML = `
                         <img src="${getRoleBadge(item.role, item.useOldBadge)}" class="badge-img" alt="${item.role}" title="${item.role}">
                         <span class="user-name">${item.name || item.user}</span>
                         <span class="user-id">(ID: ${item.id})</span>
+                        ${adminBtns}
                     `;
                     dayBlock.appendChild(recordEl);
                 });
@@ -98,7 +112,7 @@ export function renderFechasTimeline(container, records, order = 'desc') {
     });
 }
 
-export function renderSearchResults(container, results) {
+export function renderSearchResults(container, results, isAdmin = false) {
     container.innerHTML = '';
 
     if (!results || results.length === 0) {
@@ -115,23 +129,40 @@ export function renderSearchResults(container, results) {
             ? `<p class="user-id" style="margin-top: 4px;">Nombres anteriores: ${item.previousNames.join(', ')}</p>` 
             : '';
 
-        card.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <img src="${getRoleBadge(item.role, item.useOldBadge)}" class="badge-img" alt="${item.role}" title="${item.role}">
-                <div>
-                    <h3 style="margin: 0; font-size: 1.1rem;">${item.name || item.user} <span class="user-id">(ID: ${item.id})</span></h3>
-                    ${prevNames}
-                    <p style="margin-top: 4px; font-size: 0.9rem; color: var(--text-muted);">
-                        Fecha: ${item.dateStr || item.date} ${item.time || ''}
-                    </p>
+        let adminBtns = '';
+        if (isAdmin) {
+            adminBtns = `
+                <div class="admin-card-actions">
+                    <button class="btn-card-action btn-edit-record" data-id="${item.id}" title="Editar Registro">
+                        <img src="assets/edited.png" alt="Editar">
+                    </button>
+                    <button class="btn-card-action btn-delete-record" data-id="${item.id}" title="Eliminar Registro">
+                        <img src="assets/delete.png" alt="Eliminar">
+                    </button>
                 </div>
+            `;
+        }
+
+        card.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="${getRoleBadge(item.role, item.useOldBadge)}" class="badge-img" alt="${item.role}" title="${item.role}">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.1rem;">${item.name || item.user} <span class="user-id">(ID: ${item.id})</span></h3>
+                        ${prevNames}
+                        <p style="margin-top: 4px; font-size: 0.9rem; color: var(--text-muted);">
+                            Fecha: ${item.dateStr || item.date} ${item.time || ''}
+                        </p>
+                    </div>
+                </div>
+                ${adminBtns}
             </div>
         `;
         container.appendChild(card);
     });
 }
 
-export function renderSimpleList(container, records) {
+export function renderSimpleList(container, records, isAdmin = false) {
     container.innerHTML = '';
 
     if (!records || records.length === 0) {
@@ -144,6 +175,20 @@ export function renderSimpleList(container, records) {
         const recordEl = document.createElement('div');
         recordEl.className = `record-item ${isPromote ? 'record-promote' : 'record-demote'}`;
 
+        let adminBtns = '';
+        if (isAdmin) {
+            adminBtns = `
+                <div class="admin-card-actions">
+                    <button class="btn-card-action btn-edit-record" data-id="${item.id}" title="Editar Registro">
+                        <img src="assets/edited.png" alt="Editar">
+                    </button>
+                    <button class="btn-card-action btn-delete-record" data-id="${item.id}" title="Eliminar Registro">
+                        <img src="assets/delete.png" alt="Eliminar">
+                    </button>
+                </div>
+            `;
+        }
+
         recordEl.innerHTML = `
             <img src="${getRoleBadge(item.role, item.useOldBadge)}" class="badge-img" alt="${item.role}" title="${item.role}">
             <span style="font-family: var(--font-heading); font-size: 0.9rem; color: var(--accent-cyan); margin-right: 8px;">
@@ -151,6 +196,7 @@ export function renderSimpleList(container, records) {
             </span>
             <span class="user-name">${item.name || item.user}</span>
             <span class="user-id">(ID: ${item.id})</span>
+            ${adminBtns}
         `;
         container.appendChild(recordEl);
     });

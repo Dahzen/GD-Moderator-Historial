@@ -19,16 +19,28 @@ import {
     setCurrentRoleFilter,
     setUseOldBadgeInRoles
 } from './state.js';
+import { prepareEditMember, quickDeleteRecord, quickDeleteMember } from './admin.js';
 
-let datesOrder = 'desc'; // 'desc' = Reciente a Antigua, 'asc' = Antigua a Reciente
+let datesOrder = 'desc';
+export let isAdminModeActive = false;
+export let previousTabBeforeEdit = 'tab-intro';
+
+export function setIsAdminModeActive(val) {
+    isAdminModeActive = val;
+    renderGatekeepers();
+    renderFechasTimeline();
+    renderRolesTimeline();
+}
 
 export function setDatesOrder(order) {
     datesOrder = order;
     renderFechasTimeline();
 }
 
-// Cambio de Pestañas Principales
 export function switchTab(tabId) {
+    if (tabId !== 'tab-ajustes') {
+        previousTabBeforeEdit = tabId;
+    }
     document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
     document.getElementById(tabId)?.classList.add("active");
 
@@ -38,7 +50,6 @@ export function switchTab(tabId) {
     if (tabId === "tab-otros") renderEstadisticas();
 }
 
-// 1. FECHAS
 export function selectFechasFilter(year) {
     setCurrentFechasYear(year);
     switchTab("tab-fechas");
@@ -70,7 +81,6 @@ export function renderFechasTimeline() {
 
     let filtered = historyData.filter(item => {
         if (currentFechasYear !== "all" && String(item.year) !== String(currentFechasYear)) return false;
-        
         const isPromote = isPromoteRole(item.role);
 
         if (fechasFilterState === 1 && !isPromote) return false;
@@ -89,10 +99,10 @@ export function renderFechasTimeline() {
         return datesOrder === 'desc' ? dateB - dateA : dateA - dateB;
     });
 
-    renderFechasComponent(container, filtered, datesOrder);
+    renderFechasComponent(container, filtered, datesOrder, isAdminModeActive);
+    attachCardEvents(container);
 }
 
-// 2. ROLES
 export function selectRolesFilter(role) {
     setCurrentRoleFilter(role);
     switchTab("tab-roles");
@@ -135,10 +145,10 @@ export function renderRolesTimeline() {
         useOldBadge: useOldBadgeInRoles
     }));
 
-    renderSimpleList(container, filtered);
+    renderSimpleList(container, filtered, isAdminModeActive);
+    attachCardEvents(container);
 }
 
-// 3. NACIONALIDAD
 export function renderNacionalidades() {
     const grid = document.getElementById("country-grid");
     if (!grid) return;
@@ -169,11 +179,11 @@ export function showCountryRecords(country) {
     container.innerHTML = `<h3 style="color:var(--border-glow); margin-bottom: 0.8rem;">Registros de: ${country}</h3>`;
     
     let listWrapper = document.createElement("div");
-    renderSimpleList(listWrapper, records);
+    renderSimpleList(listWrapper, records, isAdminModeActive);
     container.appendChild(listWrapper);
+    attachCardEvents(listWrapper);
 }
 
-// 4. BUSCADOR
 export function executeSearch() {
     const input = document.getElementById("search-input");
     const container = document.getElementById("search-results-container");
@@ -197,10 +207,10 @@ export function executeSearch() {
         date: item.dateStr || `${item.day}/${item.month}/${item.year}`
     }));
 
-    renderSearchComponent(container, results);
+    renderSearchComponent(container, results, isAdminModeActive);
+    attachCardEvents(container);
 }
 
-// 5. OTROS / ESTADÍSTICAS
 export function renderEstadisticas() {
     const totalProm = document.getElementById("stat-total-promotes");
     const totalDem = document.getElementById("stat-total-demotes");
@@ -231,7 +241,7 @@ export function renderEstadisticas() {
     });
 }
 
-// GATEKEEPERS EN INTRODUCCIÓN
+// GATEKEEPERS EN INTRODUCCIÓN (CON BOTÓN DE ELIMINAR MIEMBRO)
 export function renderGatekeepers() {
     const mList = document.getElementById("gk-list-moderators");
     const aList = document.getElementById("gk-list-advisors");
@@ -243,16 +253,56 @@ export function renderGatekeepers() {
     gatekeepersList.forEach(gk => {
         let item = document.createElement("div");
         item.className = "gk-item";
+
+        let deleteBtn = '';
+        if (isAdminModeActive) {
+            deleteBtn = `
+                <button class="btn-card-action btn-delete-member" data-id="${gk.id}" title="Eliminar Miembro" style="margin-left:auto;">
+                    <img src="assets/delete.png" alt="Eliminar">
+                </button>
+            `;
+        }
+
         item.innerHTML = `
             <img src="${getRoleBadge(gk.role)}" class="badge-img" alt="${gk.role}" title="${gk.role}">
             <div>
                 <strong>${gk.name || gk.user}</strong>
                 <div style="font-size:0.8rem; color:var(--text-muted)">ID: ${gk.id}</div>
             </div>
+            ${deleteBtn}
         `;
+
         if (gk.role === "Moderator") mList.appendChild(item);
         else if (gk.role === "Rating Advisor" && aList) aList.appendChild(item);
         else if (gk.role === "Leaderboard Mod" && lList) lList.appendChild(item);
+    });
+
+    // Adjuntar evento de eliminación a los miembros en la pestaña de introducción
+    document.querySelectorAll('.btn-delete-member').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const id = btn.getAttribute('data-id');
+            quickDeleteMember(id);
+        };
+    });
+}
+
+// Adjuntar eventos de Editar/Eliminar en las tarjetas del timeline
+function attachCardEvents(parent) {
+    parent.querySelectorAll('.btn-edit-record').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const id = btn.getAttribute('data-id');
+            prepareEditMember(id);
+        };
+    });
+
+    parent.querySelectorAll('.btn-delete-record').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const id = btn.getAttribute('data-id');
+            quickDeleteRecord(id);
+        };
     });
 }
 

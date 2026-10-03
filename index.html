@@ -118,7 +118,7 @@
             <article class="content-card">
                 <h2>Fechas</h2>
                 <p id="desc-fechas">Historial cronológico estructurado por Años, Meses y Días. Utiliza el botón interactivo para filtrar entre ascensos, descensos o ver el registro completo.</p>
-                <select onchange="import('./js/ui.js').then(m => m.setDatesOrder(this.value))">
+                <select id="select-dates-order">
                     <option value="desc">Más reciente a más antiguo</option>
                     <option value="asc">Más antiguo a más reciente</option>
                 </select>
@@ -263,7 +263,7 @@
                         </div>
                     </div>
 
-                    <!-- 2. MODIFICAR ASSETS / ICONOS (NUEVO SELECTOR CUSTOM) -->
+                    <!-- 2. MODIFICAR ASSETS / ICONOS -->
                     <div class="admin-section">
                         <h3>Modificar Assets / Iconos</h3>
                         
@@ -319,43 +319,7 @@
                         </div>
                     </div>
 
-                    <!-- 3. MODIFICAR MIEMBRO -->
-                    <div class="admin-section">
-                        <h3>Modificar Miembro</h3>
-                        <input type="text" id="edit-member-id" placeholder="ID del Usuario a modificar" style="margin-bottom:8px;">
-                        <input type="text" id="edit-member-newname" placeholder="Nuevo Nombre (Opcional)" style="margin-bottom:8px;">
-                        
-                        <div class="role-selector-container" style="margin-bottom:8px;">
-                            <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Cambiar Rol (Opcional):</label>
-                            <div class="role-selector-wrapper">
-                                <button type="button" class="btn-role-trigger" id="btn-trigger-edit-role" data-selected-role="">
-                                    <img src="assets/rating_advisor.png" alt="Rol Seleccionado" id="img-selected-edit-role">
-                                </button>
-                                <div class="role-options-popup hidden" id="popup-edit-role">
-                                    <button type="button" class="role-option-btn" data-role="Rating Advisor" title="Rating Advisor">
-                                        <img src="assets/rating_advisor.png" alt="Rating Advisor">
-                                    </button>
-                                    <button type="button" class="role-option-btn" data-role="Moderator" title="Moderator">
-                                        <img src="assets/moderator.png" alt="Moderator">
-                                    </button>
-                                    <button type="button" class="role-option-btn" data-role="Leaderboard Mod" title="Leaderboard Mod">
-                                        <img src="assets/leaderboard_Mod.png" alt="Leaderboard Mod">
-                                    </button>
-                                    <button type="button" class="role-option-btn" data-role="Ex Rating Advisor" title="Ex Rating Advisor">
-                                        <img src="assets/ex_rating_advisor.png" alt="Ex Rating Advisor" onerror="this.onerror=null; this.src='assets/rating_advisor.png';">
-                                    </button>
-                                    <button type="button" class="role-option-btn" data-role="Ex Moderator" title="Ex Moderator">
-                                        <img src="assets/ex_moderator.png" alt="Ex Moderator" onerror="this.onerror=null; this.src='assets/moderator.png';">
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <input type="datetime-local" id="edit-member-date" style="margin-bottom:8px;">
-                        <button class="btn-action" id="btn-admin-edit">Aplicar Cambios</button>
-                    </div>
-
-                    <!-- 4. AGREGAR MIEMBRO -->
+                    <!-- 3. AGREGAR MIEMBRO -->
                     <div class="admin-section">
                         <h3>Agregar Miembro</h3>
                         
@@ -386,18 +350,65 @@
                         <button class="btn-action" id="btn-admin-add">Agregar Nuevo Registro</button>
                     </div>
 
-                    <!-- 5. ELIMINAR MIEMBRO -->
-                    <div class="admin-section">
-                        <h3>Eliminar Miembro / Registro</h3>
-                        <input type="text" id="delete-member-id" placeholder="ID del Usuario o Registro a eliminar" style="margin-bottom:8px;">
-                        <button class="btn-action btn-danger" id="btn-admin-delete">Eliminar Registro</button>
-                    </div>
-
                 </div>
             </article>
         </section>
 
     </main>
+
+    <!-- MODAL CUSTOM DE CONFIRMACIÓN DE ELIMINACIÓN -->
+    <div id="modal-delete" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="modal-delete-title">¿Confirmar Eliminación?</h3>
+            <p id="modal-delete-msg" style="color:var(--text-muted); text-align:center; margin-bottom:1.2rem;">
+                Esta acción no se puede deshacer.
+            </p>
+            <div class="modal-actions">
+                <button class="btn-action btn-danger" id="btn-modal-confirm-delete">Eliminar</button>
+                <button class="btn-action btn-secondary" id="btn-modal-cancel-delete">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CUSTOM DE EDICIÓN COMPLETA -->
+    <div id="modal-edit" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Editar Registro</h3>
+            
+            <input type="hidden" id="modal-edit-id">
+
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.85rem; color:var(--text-muted);">Nombre de Usuario:</label>
+                <input type="text" id="modal-edit-name" placeholder="Nombre">
+            </div>
+
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.85rem; color:var(--text-muted);">Rol:</label>
+                <select id="modal-edit-role">
+                    <option value="Rating Advisor">Rating Advisor</option>
+                    <option value="Moderator">Moderator</option>
+                    <option value="Leaderboard Mod">Leaderboard Mod</option>
+                    <option value="Ex Rating Advisor">Ex Rating Advisor</option>
+                    <option value="Ex Moderator">Ex Moderator</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.85rem; color:var(--text-muted);">Fecha y Hora:</label>
+                <input type="datetime-local" id="modal-edit-date">
+            </div>
+
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.85rem; color:var(--text-muted);">País / Nacionalidad:</label>
+                <input type="text" id="modal-edit-country" placeholder="Ej: México, España...">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-action" id="btn-modal-save-edit">Guardar Cambios</button>
+                <button class="btn-action btn-secondary" id="btn-modal-cancel-edit">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="js/main.js"></script>
 </body>
