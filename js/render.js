@@ -18,7 +18,6 @@ export function getRoleBadge(role, useOld = false) {
         'Leaderboard Mod': 'assets/leaderboard_Mod.png',
         'Ex Rating Advisor': 'assets/ex_rating_advisor.png',
         'Ex Moderator': 'assets/ex_moderator.png',
-        'Ex Leaderboard Mod': 'assets/ex_leaderboard_mod.png'
     };
     return badges[role] || 'assets/rating_advisor.png';
 }
@@ -83,20 +82,22 @@ export function renderFechasTimeline(container, records, order = 'desc', isAdmin
                     if (isAdmin) {
                         adminBtns = `
                             <div class="admin-card-actions">
-                                <button class="btn-card-action btn-edit-record" data-id="${item.id}" title="Editar Registro">
-                                    <img src="assets/edited.png" alt="Editar">
+                                <button class="btn-card-action btn-edit-record" data-id="${item.idRecord || item.id}" title="Editar Registro">
+                                    <img src="assets/settings.png" alt="Editar">
                                 </button>
-                                <button class="btn-card-action btn-delete-record" data-id="${item.id}" title="Eliminar Registro">
+                                <button class="btn-card-action btn-delete-record" data-id="${item.idRecord || item.id}" title="Eliminar Registro">
                                     <img src="assets/delete.png" alt="Eliminar">
                                 </button>
                             </div>
                         `;
                     }
 
+                    const displayUserId = item.userId ? item.userId : item.id;
+
                     recordEl.innerHTML = `
                         <img src="${getRoleBadge(item.role, item.useOldBadge)}" class="badge-img" alt="${item.role}" title="${item.role}">
-                        <span class="user-name">${item.name || item.user}</span>
-                        <span class="user-id">(ID: ${item.id})</span>
+                        <span class="user-name">${item.name || item.userName || item.user}</span>
+                        <span class="user-id">(ID: ${displayUserId})</span>
                         ${adminBtns}
                     `;
                     dayBlock.appendChild(recordEl);
@@ -133,22 +134,24 @@ export function renderSearchResults(container, results, isAdmin = false) {
         if (isAdmin) {
             adminBtns = `
                 <div class="admin-card-actions">
-                    <button class="btn-card-action btn-edit-record" data-id="${item.id}" title="Editar Registro">
-                        <img src="assets/edited.png" alt="Editar">
+                    <button class="btn-card-action btn-edit-record" data-id="${item.idRecord || item.id}" title="Editar Registro">
+                        <img src="assets/settings.png" alt="Editar">
                     </button>
-                    <button class="btn-card-action btn-delete-record" data-id="${item.id}" title="Eliminar Registro">
+                    <button class="btn-card-action btn-delete-record" data-id="${item.idRecord || item.id}" title="Eliminar Registro">
                         <img src="assets/delete.png" alt="Eliminar">
                     </button>
                 </div>
             `;
         }
 
+        const displayUserId = item.userId ? item.userId : item.id;
+
         card.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <img src="${getRoleBadge(item.role, item.useOldBadge)}" class="badge-img" alt="${item.role}" title="${item.role}">
                     <div>
-                        <h3 style="margin: 0; font-size: 1.1rem;">${item.name || item.user} <span class="user-id">(ID: ${item.id})</span></h3>
+                        <h3 style="margin: 0; font-size: 1.1rem;">${item.name || item.userName || item.user} <span class="user-id">(ID: ${displayUserId})</span></h3>
                         ${prevNames}
                         <p style="margin-top: 4px; font-size: 0.9rem; color: var(--text-muted);">
                             Fecha: ${item.dateStr || item.date} ${item.time || ''}
@@ -179,23 +182,25 @@ export function renderSimpleList(container, records, isAdmin = false) {
         if (isAdmin) {
             adminBtns = `
                 <div class="admin-card-actions">
-                    <button class="btn-card-action btn-edit-record" data-id="${item.id}" title="Editar Registro">
-                        <img src="assets/edited.png" alt="Editar">
+                    <button class="btn-card-action btn-edit-record" data-id="${item.idRecord || item.id}" title="Editar Registro">
+                        <img src="assets/settings.png" alt="Editar">
                     </button>
-                    <button class="btn-card-action btn-delete-record" data-id="${item.id}" title="Eliminar Registro">
+                    <button class="btn-card-action btn-delete-record" data-id="${item.idRecord || item.id}" title="Eliminar Registro">
                         <img src="assets/delete.png" alt="Eliminar">
                     </button>
                 </div>
             `;
         }
 
+        const displayUserId = item.userId ? item.userId : item.id;
+
         recordEl.innerHTML = `
             <img src="${getRoleBadge(item.role, item.useOldBadge)}" class="badge-img" alt="${item.role}" title="${item.role}">
             <span style="font-family: var(--font-heading); font-size: 0.9rem; color: var(--accent-cyan); margin-right: 8px;">
                 ${item.dateStr || item.date}
             </span>
-            <span class="user-name">${item.name || item.user}</span>
-            <span class="user-id">(ID: ${item.id})</span>
+            <span class="user-name">${item.name || item.userName || item.user}</span>
+            <span class="user-id">(ID: ${displayUserId})</span>
             ${adminBtns}
         `;
         container.appendChild(recordEl);

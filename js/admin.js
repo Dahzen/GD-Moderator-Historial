@@ -1,11 +1,19 @@
 // admin.js
 import { assetPaths } from './config.js';
-import { historyData, gatekeepersList } from './state.js';
+import { registros, usuarios, syncUsuariosFromRegistros } from './state.js';
 import { renderGatekeepers, renderFechasTimeline, renderRolesTimeline, setIsAdminModeActive } from './ui.js';
 import { guardarEnLocalStorage } from './storage.js';
 
-let itemToDeleteId = null;
-let deleteType = null; // 'record' o 'member'
+let targetDeleteId = null;
+let deleteCategory = null; // 'registro' o 'usuario'
+
+const ROLE_ASSETS = {
+    'Rating Advisor': 'assets/rating_advisor.png',
+    'Moderator': 'assets/moderator.png',
+    'Leaderboard Mod': 'assets/leaderboard_Mod.png',
+    'Ex Rating Advisor': 'assets/ex_rating_advisor.png',
+    'Ex Moderator': 'assets/ex_moderator.png',
+};
 
 export function toggleAdminPanel(enabled) {
     document.getElementById("admin-panel")?.classList.toggle("hidden", !enabled);
@@ -13,53 +21,122 @@ export function toggleAdminPanel(enabled) {
 }
 
 export function setupRoleSelectors() {
-    setupSingleSelector("btn-trigger-add-role", "popup-add-role", "img-selected-add-role");
+    setupRolePicker("add");
+    setupRolePicker("edit");
+
     setupTextManager();
     setupAssetSelector();
     setupModalEvents();
 }
 
-function setupSingleSelector(triggerId, popupId, imgId) {
-    const trigger = document.getElementById(triggerId);
-    const popup = document.getElementById(popupId);
-    const imgSelected = document.getElementById(imgId);
+function setupRolePicker(prefix, currentRole = "Rating Advisor") {
+    const popup = document.getElementById(`popup-${prefix}-role`);
+    const trigger = document.getElementById(`btn-trigger-${prefix}-role`);
+    const imgSelected = document.getElementById(`img-selected-${prefix}-role`);
 
-    if (!trigger || !popup) return;
+    if (!popup || !trigger || !imgSelected) return;
+
+    const allRoles = [
+        "Rating Advisor",
+        "Moderator",
+        "Leaderboard Mod",
+        "Ex Rating Advisor",
+        "Ex Moderator",
+    ];
+
+    popup.innerHTML = "";
+
+    allRoles.forEach(role => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "role-option-btn";
+        btn.setAttribute("data-role", role);
+        btn.title = role;
+        btn.innerHTML = `<img src="${ROLE_ASSETS[role] || 'assets/rating_advisor.png'}" alt="${role}">`;
+
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            trigger.setAttribute("data-selected-role", role);
+            imgSelected.setAttribute("src", ROLE_ASSETS[role] || 'assets/rating_advisor.png');
+
+            popup.querySelectorAll(".role-option-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            popup.classList.add("hidden");
+        });
+
+        popup.appendChild(btn);
+    });
+
+    trigger.setAttribute("data-selected-role", currentRole);
+    imgSelected.setAttribute("src", ROLE_ASSETS[currentRole] || 'assets/rating_advisor.png');
 
     trigger.addEventListener("click", (e) => {
         e.stopPropagation();
         popup.classList.toggle("hidden");
     });
 
-    popup.querySelectorAll(".role-option-btn").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const selectedRole = btn.getAttribute("data-role");
-            const imgSrc = btn.querySelector("img").getAttribute("src");
-
-            trigger.setAttribute("data-selected-role", selectedRole);
-            if (imgSelected) imgSelected.setAttribute("src", imgSrc);
-
-            popup.querySelectorAll(".role-option-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-
-            popup.classList.add("hidden");
-        });
-    });
-
     document.addEventListener("click", () => popup.classList.add("hidden"));
 }
 
 /* ===================================================
-   GESTIÓN DE MODALES CUSTOM (EDITAR Y ELIMINAR)
+   1. AGREGAR REGISTRO (CREA/ACTUALIZA USUARIOS)
+   =================================================== */
+export function adminAddRegistro() {
+    const userName = document.getElementById("add-name")?.value.trim();
+    const userId = document.getElementById("add-id")?.value.trim();
+    const role = document.getElementById("btn-trigger-add-role")?.getAttribute("data-selected-role") || "Rating Advisor";
+    const dateVal = document.getElementById("add-date")?.value;
+    const country = document.getElementById("add-country")?.value.trim() || "Global";
+
+    if (!userName || !userId || !dateVal || !role) {
+        return alert("Completa todos los campos obligatorios (Nombre, ID, Rol y Fecha).");
+    }
+
+    const type = role.startsWith("Ex ") ? "demote" : "promote";
+
+    const d = new Date(dateVal);
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+    const hours = d.getHours().toString().padStart(2, '0');
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    const dateFormatted = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')} ${hours}:${minutes}`;
+
+    const nuevoRegistro = {
+        idRecord: 'rec_' + Date.now(),
+        userId: userId,
+        userName: userName,
+        role: role,
+        type: type,
+        year: d.getFullYear().toString(),
+        month: monthNames[d.getMonth()],
+        day: d.getDate().toString(),
+        hours: hours,
+        minutes: minutes,
+        dateStr: dateFormatted,
+        country: country
+    };
+
+    registros.push(nuevoRegistro);
+
+    syncUsuariosFromRegistros();
+    guardarEnLocalStorage(registros, usuarios);
+
+    renderGatekeepers();
+    renderFechasTimeline();
+    renderRolesTimeline();
+
+    alert("Registro agregado con éxito. El usuario se ha actualizado automáticamente.");
+}
+
+/* ===================================================
+   2. GESTIÓN DE MODALES CUSTOM (ELIMINAR Y EDITAR)
    =================================================== */
 
 function setupModalEvents() {
-    // Modales
     const modalDelete = document.getElementById('modal-delete');
     const modalEdit = document.getElementById('modal-edit');
+    const modalUserEdit = document.getElementById('modal-edit-user');
 
-    // Botones Cancelar
     document.getElementById('btn-modal-cancel-delete')?.addEventListener('click', () => {
         modalDelete?.classList.add('hidden');
     });
@@ -68,19 +145,28 @@ function setupModalEvents() {
         modalEdit?.classList.add('hidden');
     });
 
-    // Confirmar Eliminar
-    document.getElementById('btn-modal-confirm-delete')?.addEventListener('click', () => {
-        if (!itemToDeleteId) return;
+    document.getElementById('btn-modal-cancel-user-edit')?.addEventListener('click', () => {
+        modalUserEdit?.classList.add('hidden');
+    });
 
-        if (deleteType === 'record') {
-            const idx = historyData.findIndex(i => String(i.id) === String(itemToDeleteId));
-            if (idx !== -1) historyData.splice(idx, 1);
-        } else if (deleteType === 'member') {
-            const idx = gatekeepersList.findIndex(i => String(i.id) === String(itemToDeleteId));
-            if (idx !== -1) gatekeepersList.splice(idx, 1);
+    // Confirmación de Eliminación
+    document.getElementById('btn-modal-confirm-delete')?.addEventListener('click', () => {
+        if (!targetDeleteId) return;
+
+        if (deleteCategory === 'registro') {
+            const idx = registros.findIndex(r => String(r.idRecord) === String(targetDeleteId));
+            if (idx !== -1) registros.splice(idx, 1);
+        } else if (deleteCategory === 'usuario') {
+            for (let i = registros.length - 1; i >= 0; i--) {
+                if (String(registros[i].userId) === String(targetDeleteId)) {
+                    registros.splice(i, 1);
+                }
+            }
         }
 
-        guardarEnLocalStorage(historyData, gatekeepersList);
+        syncUsuariosFromRegistros();
+        guardarEnLocalStorage(registros, usuarios);
+
         renderGatekeepers();
         renderFechasTimeline();
         renderRolesTimeline();
@@ -88,34 +174,63 @@ function setupModalEvents() {
         modalDelete?.classList.add('hidden');
     });
 
-    // Guardar Edición
+    // Guardar Edición de Usuario Individual
+    document.getElementById('btn-modal-save-user-edit')?.addEventListener('click', () => {
+        const userId = document.getElementById('modal-edit-user-id').value;
+        const newName = document.getElementById('modal-edit-user-name').value.trim();
+        const newCountry = document.getElementById('modal-edit-user-country').value.trim();
+
+        // Actualiza todos los registros asociados al usuario
+        registros.forEach(r => {
+            if (String(r.userId) === String(userId)) {
+                if (newName) r.userName = newName;
+                if (newCountry) r.country = newCountry;
+            }
+        });
+
+        syncUsuariosFromRegistros();
+        guardarEnLocalStorage(registros, usuarios);
+
+        renderGatekeepers();
+        renderFechasTimeline();
+        renderRolesTimeline();
+
+        modalUserEdit?.classList.add('hidden');
+    });
+
+    // Guardar Edición de Registro
     document.getElementById('btn-modal-save-edit')?.addEventListener('click', () => {
-        const id = document.getElementById('modal-edit-id').value;
+        const idRecord = document.getElementById('modal-edit-id').value;
         const name = document.getElementById('modal-edit-name').value.trim();
-        const role = document.getElementById('modal-edit-role').value;
+        const role = document.getElementById('btn-trigger-edit-role')?.getAttribute('data-selected-role');
         const dateVal = document.getElementById('modal-edit-date').value;
         const country = document.getElementById('modal-edit-country').value.trim();
 
-        const target = historyData.find(i => String(i.id) === String(id));
-        if (target) {
-            if (name) target.user = name;
-            if (role) target.role = role;
-            if (country) target.country = country;
+        const reg = registros.find(r => String(r.idRecord) === String(idRecord));
+        if (reg) {
+            if (name) reg.userName = name;
+            if (role) {
+                reg.role = role;
+                reg.type = role.startsWith('Ex ') ? 'demote' : 'promote';
+            }
+            if (country) reg.country = country;
 
             if (dateVal) {
                 const d = new Date(dateVal);
                 const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
                 
-                target.year = d.getFullYear().toString();
-                target.month = monthNames[d.getMonth()];
-                target.day = d.getDate().toString();
-
-                const hours = d.getHours().toString().padStart(2, '0');
-                const minutes = d.getMinutes().toString().padStart(2, '0');
-                target.dateStr = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()} ${hours}:${minutes}`;
+                reg.year = d.getFullYear().toString();
+                reg.month = monthNames[d.getMonth()];
+                reg.day = d.getDate().toString();
+                reg.hours = d.getHours().toString().padStart(2, '0');
+                reg.minutes = d.getMinutes().toString().padStart(2, '0');
+                reg.dateStr = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')} ${reg.hours}:${reg.minutes}`;
             }
 
-            guardarEnLocalStorage(historyData, gatekeepersList);
+            syncUsuariosFromRegistros();
+            guardarEnLocalStorage(registros, usuarios);
+
+            renderGatekeepers();
             renderFechasTimeline();
             renderRolesTimeline();
         }
@@ -124,45 +239,80 @@ function setupModalEvents() {
     });
 }
 
-// Abrir Modal de Confirmación para Eliminar
-export function quickDeleteRecord(id) {
-    itemToDeleteId = id;
-    deleteType = 'record';
+// Abrir Modal para Editar Usuario Individualmente
+export function openEditUsuarioModal(userId) {
+    const userObj = usuarios.find(u => String(u.userId) === String(userId));
+    if (!userObj) return;
+
+    document.getElementById('modal-edit-user-id').value = userId;
+    document.getElementById('modal-edit-user-name').value = userObj.currentName || '';
+    document.getElementById('modal-edit-user-country').value = userObj.country || '';
+
+    document.getElementById('modal-edit-user')?.classList.remove('hidden');
+}
+
+// Abrir Modal de Confirmación para Eliminar Registro Individual
+export function openDeleteRegistroModal(idRecord) {
+    targetDeleteId = idRecord;
+    deleteCategory = 'registro';
     document.getElementById('modal-delete-title').textContent = '¿Eliminar Registro?';
-    document.getElementById('modal-delete-msg').textContent = `¿Estás seguro de eliminar este registro histórico (ID: ${id})?`;
+    document.getElementById('modal-delete-msg').textContent = `¿Estás seguro de eliminar este registro específico del historial?`;
     document.getElementById('modal-delete')?.classList.remove('hidden');
 }
 
-export function quickDeleteMember(id) {
-    itemToDeleteId = id;
-    deleteType = 'member';
-    document.getElementById('modal-delete-title').textContent = '¿Eliminar Miembro?';
-    document.getElementById('modal-delete-msg').textContent = `¿Estás seguro de eliminar a este miembro de Gatekeepers (ID: ${id})?`;
+// Abrir Modal para Eliminar Usuario y TODOS sus Registros en Cascada
+export function openDeleteUsuarioModal(userId) {
+    targetDeleteId = userId;
+    deleteCategory = 'usuario';
+
+    const userObj = usuarios.find(u => String(u.userId) === String(userId));
+    const name = userObj ? userObj.currentName : userId;
+
+    document.getElementById('modal-delete-title').textContent = '¿Eliminar Usuario e Historial?';
+    document.getElementById('modal-delete-msg').textContent = `¡Atención! Se eliminará al usuario "${name}" y TODOS sus registros asociados.`;
     document.getElementById('modal-delete')?.classList.remove('hidden');
 }
 
-// Abrir Modal de Edición
-export function prepareEditMember(id) {
-    const target = historyData.find(i => String(i.id) === String(id));
-    if (!target) return;
+// Abrir Modal de Edición de Registro
+export function openEditRegistroModal(idRecord) {
+    const reg = registros.find(r => String(r.idRecord) === String(idRecord));
+    if (!reg) return;
 
-    document.getElementById('modal-edit-id').value = target.id;
-    document.getElementById('modal-edit-name').value = target.user || target.name || '';
-    document.getElementById('modal-edit-role').value = target.role || 'Rating Advisor';
-    document.getElementById('modal-edit-country').value = target.country || '';
+    document.getElementById('modal-edit-id').value = reg.idRecord;
+    document.getElementById('modal-edit-name').value = reg.userName;
+
+    const currentRole = reg.role || 'Rating Advisor';
+    const trigger = document.getElementById('btn-trigger-edit-role');
+    const imgSelected = document.getElementById('img-selected-edit-role');
+    if (trigger && imgSelected) {
+        trigger.setAttribute('data-selected-role', currentRole);
+        imgSelected.setAttribute('src', ROLE_ASSETS[currentRole] || 'assets/rating_advisor.png');
+    }
+
+    let formattedDate = '';
+    if (reg.year && reg.month && reg.day) {
+        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const mIdx = monthNames.indexOf(reg.month) + 1;
+        const mm = String(mIdx).padStart(2, '0');
+        const dd = String(reg.day).padStart(2, '0');
+        const hours = reg.hours || '12';
+        const minutes = reg.minutes || '00';
+        formattedDate = `${reg.year}-${mm}-${dd}T${hours}:${minutes}`;
+    }
+    document.getElementById('modal-edit-date').value = formattedDate;
+    document.getElementById('modal-edit-country').value = reg.country || '';
 
     document.getElementById('modal-edit')?.classList.remove('hidden');
 }
 
 /* ===================================================
-   GESTOR DE TEXTOS Y ASSETS (MANTIENE FUNCIONALIDAD)
+   GESTOR DE TEXTOS Y ASSETS
    =================================================== */
 const infoTargetMap = {
     'header_main': () => document.getElementById('display-title'),
     'header_sub': () => document.getElementById('display-subtitle'),
     'intro_about_title': () => document.querySelector('#tab-intro article h3'),
     'intro_about_desc': () => document.getElementById('desc-intro'),
-    'intro_gk_title': () => document.querySelector('#tab-intro section h2'),
     'tab_fechas_desc': () => document.getElementById('desc-fechas'),
     'tab_roles_desc': () => document.querySelector('#tab-roles article h2'),
     'tab_country_desc': () => document.querySelector('#tab-nacionalidad article p'),
@@ -171,10 +321,9 @@ const infoTargetMap = {
 
 const infoDefaults = {
     'header_main': 'GD Promoted History',
-    'header_sub': 'Introducción',
+    'header_sub': 'Gatekeepers',
     'intro_about_title': 'Acerca del Documento',
     'intro_about_desc': 'Este proyecto recopila y organiza el historial completo de promociones y degradaciones dentro de la comunidad de moderación de Geometry Dash.',
-    'intro_gk_title': 'GD Gatekeepers',
     'tab_fechas_desc': 'Historial cronológico estructurado por Años, Meses y Días.',
     'tab_roles_desc': 'Filtrado por Roles',
     'tab_country_desc': 'Selecciona un país para ver los ascensos y descensos registrados en esa región:',
@@ -280,43 +429,4 @@ function setupAssetSelector() {
         if (inputUrl) inputUrl.value = '';
         alert(`Asset ${assetName} restablecido.`);
     });
-}
-
-export function adminAddMember() {
-    let role = document.getElementById("btn-trigger-add-role")?.getAttribute("data-selected-role");
-    let name = document.getElementById("add-name")?.value.trim();
-    let id = document.getElementById("add-id")?.value.trim();
-    let dateVal = document.getElementById("add-date")?.value;
-    let country = document.getElementById("add-country")?.value.trim() || "Global";
-
-    if (!name || !id || !dateVal || !role) return alert("Completa los campos requeridos.");
-
-    let d = new Date(dateVal);
-    let monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-
-    let hours = d.getHours().toString().padStart(2, '0');
-    let minutes = d.getMinutes().toString().padStart(2, '0');
-    let dateFormatted = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()} ${hours}:${minutes}`;
-
-    historyData.push({
-        year: d.getFullYear().toString(),
-        month: monthNames[d.getMonth()],
-        day: d.getDate().toString(),
-        dateStr: dateFormatted,
-        user: name,
-        oldNames: [],
-        id: id,
-        role: role,
-        type: "promote",
-        country: country
-    });
-
-    gatekeepersList.push({ name: name, id: id, role: role });
-    
-    guardarEnLocalStorage(historyData, gatekeepersList);
-    renderGatekeepers();
-    renderFechasTimeline();
-    renderRolesTimeline();
-
-    alert("Nuevo miembro agregado correctamente.");
 }

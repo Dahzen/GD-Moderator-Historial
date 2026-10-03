@@ -1,6 +1,6 @@
 // main.js
 import { cargarDatosIniciales } from './storage.js';
-import { setHistoryData, setGatekeepersList } from './state.js';
+import { setRegistros, setUsuarios, syncUsuariosFromRegistros } from './state.js';
 import * as UI from './ui.js';
 import * as Admin from './admin.js';
 
@@ -8,11 +8,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     initEventListeners();
 
     try {
-        const { historyData, gatekeepersList } = await cargarDatosIniciales();
+        const { registros: registrosCargados, usuarios: usuariosCargados } = await cargarDatosIniciales();
         
-        setHistoryData(historyData);
-        setGatekeepersList(gatekeepersList);
+        // Asignar registros cargados de storage o JSON
+        if (registrosCargados) setRegistros(registrosCargados);
+        
+        // Si existen usuarios previos los asigna, si no, los sincroniza desde los registros
+        if (usuariosCargados && usuariosCargados.length > 0) {
+            setUsuarios(usuariosCargados);
+        } else {
+            syncUsuariosFromRegistros();
+        }
 
+        // Renderizar la interfaz con la nueva estructura
         UI.renderGatekeepers();
         UI.renderFechasTimeline();
         UI.renderRolesTimeline();
@@ -22,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function initEventListeners() {
-    // Inicializar selectores visuales de roles
+    // Inicializar selectores visuales de roles y configuraciones admin
     Admin.setupRoleSelectors();
 
     // Pestañas principales
@@ -40,6 +48,11 @@ function initEventListeners() {
             const year = e.currentTarget.getAttribute("data-filter-year");
             UI.selectFechasFilter(year);
         });
+    });
+
+    // Orden de Fechas (Ascendente / Descendente)
+    document.getElementById("select-dates-order")?.addEventListener("change", (e) => {
+        UI.setDatesOrder(e.target.value);
     });
 
     // Filtros de Roles
@@ -65,9 +78,7 @@ function initEventListeners() {
 
     // Panel Administrador
     document.getElementById("toggle-admin-switch")?.addEventListener("change", (e) => Admin.toggleAdminPanel(e.target.checked));
-    document.getElementById("btn-admin-asset")?.addEventListener("click", Admin.adminUpdateAsset);
-    document.getElementById("btn-admin-info")?.addEventListener("click", Admin.adminUpdateInfo);
-    document.getElementById("btn-admin-edit")?.addEventListener("click", Admin.adminEditMember);
-    document.getElementById("btn-admin-add")?.addEventListener("click", Admin.adminAddMember);
-    document.getElementById("btn-admin-delete")?.addEventListener("click", Admin.adminDeleteMember);
+    
+    // Acción para agregar un nuevo registro desde el panel
+    document.getElementById("btn-admin-add")?.addEventListener("click", Admin.adminAddRegistro);
 }

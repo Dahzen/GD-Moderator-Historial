@@ -11,6 +11,12 @@
     <!-- ENCABEZADO Y PESTAÑAS SUPERIORES -->
     <header class="navbar-header">
         <nav class="nav-container">
+            <!-- 0. Gatekeepers -->
+            <button class="nav-btn active" id="btn-gatekeepers" data-tab="tab-intro">
+                <img src="assets/modlist.png" class="icon-small" alt="Gatekeepers">
+                <span>Gatekeepers</span>
+            </button>
+
             <!-- 1. Fechas -->
             <div class="dropdown">
                 <button class="nav-btn" id="btn-fechas" data-tab="tab-fechas">
@@ -80,13 +86,13 @@
 
         <div class="header-titles">
             <h1 class="main-title" id="display-title">GD Promoted History</h1>
-            <h2 class="sub-title" id="display-subtitle">Introducción</h2>
+            <h2 class="sub-title" id="display-subtitle">Gatekeepers</h2>
         </div>
     </header>
 
     <main class="main-content">
 
-        <!-- PESTAÑA: INTRODUCCIÓN -->
+        <!-- PESTAÑA: GATEKEEPERS / INTRODUCCIÓN -->
         <section id="tab-intro" class="tab-pane active">
             <article class="content-card">
                 <h3>Acerca del Documento</h3>
@@ -94,8 +100,6 @@
             </article>
 
             <section class="content-card">
-                <h2>GD Gatekeepers</h2>
-                
                 <div class="gk-group">
                     <h3>Moderators</h3>
                     <div class="gk-list" id="gk-list-moderators"></div>
@@ -222,39 +226,31 @@
 
                 <hr style="border-color:var(--border-glow); margin:2rem 0;">
 
-                <!-- SWITCH TOGGLE PARA MODO ADMIN -->
+                <!-- MODO ADMIN -->
                 <label class="switch-container">
                     <input type="checkbox" id="toggle-admin-switch">
                     <span class="switch-slider"></span>
                     <span class="switch-label">Habilitar Modo Admin</span>
                 </label>
 
-                <!-- PANEL DE ADMINISTRADOR -->
+                <!-- PANEL ADMIN -->
                 <div id="admin-panel" class="hidden" style="margin-top:1.5rem;">
                     
-                    <!-- 1. GESTOR DE TEXTOS E INFORMACIÓN -->
+                    <!-- GESTOR DE TEXTOS -->
                     <div class="admin-section">
                         <h3>Gestor de Textos e Información</h3>
-                        
-                        <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">
-                            Seleccionar sección / elemento específico:
-                        </label>
                         <select id="admin-info-target" style="width:100%; margin-bottom:12px;">
                             <option value="header_main">Encabezado Principal (GD Promoted History)</option>
-                            <option value="header_sub">Subtítulo Encabezado (Introducción / Secciones)</option>
+                            <option value="header_sub">Subtítulo Encabezado</option>
                             <option value="intro_about_title">Pestaña Intro: Título "Acerca del Documento"</option>
                             <option value="intro_about_desc">Pestaña Intro: Descripción "Acerca del Documento"</option>
-                            <option value="intro_gk_title">Pestaña Intro: Título "GD Gatekeepers"</option>
-                            <option value="tab_fechas_desc">Pestaña Fechas: Descripción de ayuda</option>
-                            <option value="tab_roles_desc">Pestaña Roles: Descripción de filtrado</option>
-                            <option value="tab_country_desc">Pestaña Nacionalidad: Descripción de ayuda</option>
-                            <option value="tab_search_desc">Pestaña Buscador: Placeholder / Instrucción</option>
+                            <option value="tab_fechas_desc">Pestaña Fechas: Descripción</option>
+                            <option value="tab_roles_desc">Pestaña Roles: Descripción</option>
+                            <option value="tab_country_desc">Pestaña Nacionalidad: Descripción</option>
+                            <option value="tab_search_desc">Pestaña Buscador: Placeholder</option>
                         </select>
 
-                        <div id="admin-info-fields">
-                            <label id="lbl-admin-info-text" style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Contenido actual:</label>
-                            <textarea id="admin-info-text" placeholder="Escribe el nuevo texto o contenido..." style="width:100%; min-height:90px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid var(--border-glow); padding:0.8rem; margin-bottom:12px; font-family:inherit;"></textarea>
-                        </div>
+                        <textarea id="admin-info-text" placeholder="Escribe el nuevo texto..." style="width:100%; min-height:90px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid var(--border-glow); padding:0.8rem; margin-bottom:12px;"></textarea>
 
                         <div style="display:flex; gap:8px;">
                             <button class="btn-action" id="btn-admin-info-save">Guardar Cambios</button>
@@ -263,14 +259,9 @@
                         </div>
                     </div>
 
-                    <!-- 2. MODIFICAR ASSETS / ICONOS -->
+                    <!-- ASSETS / ICONOS -->
                     <div class="admin-section">
                         <h3>Modificar Assets / Iconos</h3>
-                        
-                        <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">
-                            Seleccionar asset a reemplazar:
-                        </label>
-                        
                         <div class="role-selector-container" style="margin-bottom:12px;">
                             <div class="role-selector-wrapper" style="width:100%;">
                                 <button type="button" class="btn-role-trigger" id="btn-trigger-asset-select" data-selected-asset="moderator.png" style="width:100%; justify-content:flex-start; gap:10px; padding:8px 12px;">
@@ -278,40 +269,15 @@
                                     <span id="lbl-selected-asset" style="font-family:var(--font-heading); color:#fff;">moderator.png</span>
                                 </button>
 
-                                <div class="role-options-popup hidden" id="popup-asset-select" style="width:100%; max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; padding:6px;">
-                                    <button type="button" class="asset-option-btn" data-asset="moderator.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
-                                        <img src="assets/moderator.png" class="badge-img" alt="moderator.png">
-                                        <span>moderator.png</span>
-                                    </button>
-                                    <button type="button" class="asset-option-btn" data-asset="rating_advisor.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
-                                        <img src="assets/rating_advisor.png" class="badge-img" alt="rating_advisor.png">
-                                        <span>rating_advisor.png</span>
-                                    </button>
-                                    <button type="button" class="asset-option-btn" data-asset="leaderboard_Mod.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
-                                        <img src="assets/leaderboard_Mod.png" class="badge-img" alt="leaderboard_Mod.png">
-                                        <span>leaderboard_Mod.png</span>
-                                    </button>
-                                    <button type="button" class="asset-option-btn" data-asset="ex_rating_advisor.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
-                                        <img src="assets/ex_rating_advisor.png" class="badge-img" alt="ex_rating_advisor.png" onerror="this.onerror=null; this.src='assets/rating_advisor.png';">
-                                        <span>ex_rating_advisor.png</span>
-                                    </button>
-                                    <button type="button" class="asset-option-btn" data-asset="calendary.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
-                                        <img src="assets/calendary.png" class="badge-img" alt="calendary.png">
-                                        <span>calendary.png</span>
-                                    </button>
-                                    <button type="button" class="asset-option-btn" data-asset="country.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
-                                        <img src="assets/country.png" class="badge-img" alt="country.png">
-                                        <span>country.png</span>
-                                    </button>
-                                    <button type="button" class="asset-option-btn" data-asset="search.png" style="display:flex; align-items:center; gap:10px; width:100%; background:rgba(0,0,0,0.5); border:1px solid transparent; padding:6px 10px; cursor:pointer; color:#fff; text-align:left;">
-                                        <img src="assets/search.png" class="badge-img" alt="search.png">
-                                        <span>search.png</span>
-                                    </button>
+                                <div class="role-options-popup hidden" id="popup-asset-select" style="width:100%; max-height:200px; overflow-y:auto;">
+                                    <button type="button" class="asset-option-btn" data-asset="moderator.png"><img src="assets/moderator.png" class="badge-img"> <span>moderator.png</span></button>
+                                    <button type="button" class="asset-option-btn" data-asset="rating_advisor.png"><img src="assets/rating_advisor.png" class="badge-img"> <span>rating_advisor.png</span></button>
+                                    <button type="button" class="asset-option-btn" data-asset="leaderboard_Mod.png"><img src="assets/leaderboard_Mod.png" class="badge-img"> <span>leaderboard_Mod.png</span></button>
                                 </div>
                             </div>
                         </div>
 
-                        <input type="text" id="admin-asset-url" placeholder="Nueva Ruta local o URL (ej: assets/nuevo_icon.png)">
+                        <input type="text" id="admin-asset-url" placeholder="Ruta o URL (ej: assets/nuevo.png)">
                         
                         <div style="display:flex; gap:8px; margin-top:12px;">
                             <button class="btn-action" id="btn-admin-asset-save">Actualizar Asset</button>
@@ -319,50 +285,44 @@
                         </div>
                     </div>
 
-                    <!-- 3. AGREGAR MIEMBRO -->
+                    <!-- AGREGAR REGISTRO -->
                     <div class="admin-section">
-                        <h3>Agregar Miembro</h3>
+                        <h3>Agregar Nuevo Registro</h3>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">
+                            No se agregan usuarios directamente. Al registrar un evento, el usuario se crea o actualiza en automático.
+                        </p>
                         
-                        <div class="role-selector-container" style="margin-bottom:8px;">
-                            <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Seleccionar Rol:</label>
+                        <input type="text" id="add-name" placeholder="Nombre de Usuario" style="margin-bottom:8px; width:100%;">
+                        <input type="text" id="add-id" placeholder="ID de Usuario (Cuenta GD)" style="margin-bottom:8px; width:100%;">
+                        
+                        <div style="margin-bottom:8px;">
+                            <label style="font-size:0.85rem; color:var(--text-muted);">Rol Asignado:</label>
                             <div class="role-selector-wrapper">
                                 <button type="button" class="btn-role-trigger" id="btn-trigger-add-role" data-selected-role="Rating Advisor">
-                                    <img src="assets/rating_advisor.png" alt="Rol Seleccionado" id="img-selected-add-role">
+                                    <img src="assets/rating_advisor.png" alt="Rol" id="img-selected-add-role">
                                 </button>
-                                <div class="role-options-popup hidden" id="popup-add-role">
-                                    <button type="button" class="role-option-btn active" data-role="Rating Advisor" title="Rating Advisor">
-                                        <img src="assets/rating_advisor.png" alt="Rating Advisor">
-                                    </button>
-                                    <button type="button" class="role-option-btn" data-role="Moderator" title="Moderator">
-                                        <img src="assets/moderator.png" alt="Moderator">
-                                    </button>
-                                    <button type="button" class="role-option-btn" data-role="Leaderboard Mod" title="Leaderboard Mod">
-                                        <img src="assets/leaderboard_Mod.png" alt="Leaderboard Mod">
-                                    </button>
-                                </div>
+                                <div class="role-options-popup hidden" id="popup-add-role"></div>
                             </div>
                         </div>
 
-                        <input type="text" id="add-name" placeholder="Nombre de Usuario" style="margin-bottom:8px;">
-                        <input type="text" id="add-id" placeholder="ID de Usuario" style="margin-bottom:8px;">
-                        <input type="datetime-local" id="add-date" style="margin-bottom:8px;">
-                        <input type="text" id="add-country" placeholder="País / Nacionalidad" style="margin-bottom:8px;">
-                        <button class="btn-action" id="btn-admin-add">Agregar Nuevo Registro</button>
+                        <label style="font-size:0.85rem; color:var(--text-muted);">Fecha y Hora Exacta:</label>
+                        <input type="datetime-local" id="add-date" style="margin-bottom:8px; width:100%;">
+                        
+                        <input type="text" id="add-country" placeholder="País / Nacionalidad" style="margin-bottom:12px; width:100%;">
+                        
+                        <button class="btn-action" id="btn-admin-add">Crear Registro</button>
                     </div>
 
                 </div>
             </article>
         </section>
-
     </main>
 
-    <!-- MODAL CUSTOM DE CONFIRMACIÓN DE ELIMINACIÓN -->
+    <!-- MODAL CUSTOM ELIMINAR -->
     <div id="modal-delete" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 id="modal-delete-title">¿Confirmar Eliminación?</h3>
-            <p id="modal-delete-msg" style="color:var(--text-muted); text-align:center; margin-bottom:1.2rem;">
-                Esta acción no se puede deshacer.
-            </p>
+            <p id="modal-delete-msg" style="color:var(--text-muted); text-align:center; margin-bottom:1.2rem;"></p>
             <div class="modal-actions">
                 <button class="btn-action btn-danger" id="btn-modal-confirm-delete">Eliminar</button>
                 <button class="btn-action btn-secondary" id="btn-modal-cancel-delete">Cancelar</button>
@@ -370,37 +330,58 @@
         </div>
     </div>
 
-    <!-- MODAL CUSTOM DE EDICIÓN COMPLETA -->
-    <div id="modal-edit" class="modal-overlay hidden">
+    <!-- MODAL CUSTOM EDITAR USUARIO -->
+    <div id="modal-edit-user" class="modal-overlay hidden">
         <div class="modal-content">
-            <h3>Editar Registro</h3>
-            
-            <input type="hidden" id="modal-edit-id">
+            <h3>Editar Usuario</h3>
+            <input type="hidden" id="modal-edit-user-id">
 
             <div style="margin-bottom:10px;">
-                <label style="font-size:0.85rem; color:var(--text-muted);">Nombre de Usuario:</label>
-                <input type="text" id="modal-edit-name" placeholder="Nombre">
-            </div>
-
-            <div style="margin-bottom:10px;">
-                <label style="font-size:0.85rem; color:var(--text-muted);">Rol:</label>
-                <select id="modal-edit-role">
-                    <option value="Rating Advisor">Rating Advisor</option>
-                    <option value="Moderator">Moderator</option>
-                    <option value="Leaderboard Mod">Leaderboard Mod</option>
-                    <option value="Ex Rating Advisor">Ex Rating Advisor</option>
-                    <option value="Ex Moderator">Ex Moderator</option>
-                </select>
-            </div>
-
-            <div style="margin-bottom:10px;">
-                <label style="font-size:0.85rem; color:var(--text-muted);">Fecha y Hora:</label>
-                <input type="datetime-local" id="modal-edit-date">
+                <label style="font-size:0.85rem; color:var(--text-muted);">Nombre de Usuario Actual:</label>
+                <input type="text" id="modal-edit-user-name" style="width:100%;">
             </div>
 
             <div style="margin-bottom:10px;">
                 <label style="font-size:0.85rem; color:var(--text-muted);">País / Nacionalidad:</label>
-                <input type="text" id="modal-edit-country" placeholder="Ej: México, España...">
+                <input type="text" id="modal-edit-user-country" style="width:100%;">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-action" id="btn-modal-save-user-edit">Guardar Cambios</button>
+                <button class="btn-action btn-secondary" id="btn-modal-cancel-user-edit">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CUSTOM EDITAR REGISTRO -->
+    <div id="modal-edit" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Editar Registro Histórico</h3>
+            <input type="hidden" id="modal-edit-id">
+
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.85rem; color:var(--text-muted);">Nombre de Usuario:</label>
+                <input type="text" id="modal-edit-name" style="width:100%;">
+            </div>
+
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.85rem; color:var(--text-muted);">Rol:</label>
+                <div class="role-selector-wrapper">
+                    <button type="button" class="btn-role-trigger" id="btn-trigger-edit-role" data-selected-role="Rating Advisor">
+                        <img src="assets/rating_advisor.png" alt="Rol" id="img-selected-edit-role">
+                    </button>
+                    <div class="role-options-popup hidden" id="popup-edit-role"></div>
+                </div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.85rem; color:var(--text-muted);">Fecha y Hora:</label>
+                <input type="datetime-local" id="modal-edit-date" style="width:100%;">
+            </div>
+
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.85rem; color:var(--text-muted);">País / Nacionalidad:</label>
+                <input type="text" id="modal-edit-country" style="width:100%;">
             </div>
 
             <div class="modal-actions">

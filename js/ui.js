@@ -8,8 +8,8 @@ import {
     isPromoteRole
 } from './render.js';
 import { 
-    historyData, 
-    gatekeepersList, 
+    registros, 
+    usuarios, 
     currentFechasYear, 
     fechasFilterState, 
     currentRoleFilter, 
@@ -19,7 +19,7 @@ import {
     setCurrentRoleFilter,
     setUseOldBadgeInRoles
 } from './state.js';
-import { prepareEditMember, quickDeleteRecord, quickDeleteMember } from './admin.js';
+import { openEditRegistroModal, openDeleteRegistroModal, openDeleteUsuarioModal } from './admin.js';
 
 let datesOrder = 'desc';
 export let isAdminModeActive = false;
@@ -41,9 +41,36 @@ export function switchTab(tabId) {
     if (tabId !== 'tab-ajustes') {
         previousTabBeforeEdit = tabId;
     }
+
+    // Alternar contenedores visuales
     document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
     document.getElementById(tabId)?.classList.add("active");
 
+    // Sincronizar botones activos en la barra de navegación
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+        if (btn.getAttribute("data-tab") === tabId) {
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    });
+
+    // Actualizar subtítulo del encabezado
+    const subTitleEl = document.getElementById("display-subtitle");
+    if (subTitleEl) {
+        const tabTitles = {
+            'tab-intro': 'Gatekeepers',
+            'tab-fechas': 'Fechas',
+            'tab-roles': 'Roles',
+            'tab-nacionalidad': 'Nacionalidad',
+            'tab-buscador': 'Buscador',
+            'tab-otros': 'Otros',
+            'tab-ajustes': 'Ajustes'
+        };
+        subTitleEl.textContent = tabTitles[tabId] || 'Gatekeepers';
+    }
+
+    if (tabId === "tab-intro") renderGatekeepers();
     if (tabId === "tab-fechas") renderFechasTimeline();
     if (tabId === "tab-roles") renderRolesTimeline();
     if (tabId === "tab-nacionalidad") renderNacionalidades();
@@ -79,9 +106,9 @@ export function renderFechasTimeline() {
     const container = document.getElementById("fechas-timeline-container");
     if (!container) return;
 
-    let filtered = historyData.filter(item => {
+    let filtered = registros.filter(item => {
         if (currentFechasYear !== "all" && String(item.year) !== String(currentFechasYear)) return false;
-        const isPromote = isPromoteRole(item.role);
+        const isPromote = item.type === "promote" || isPromoteRole(item.role);
 
         if (fechasFilterState === 1 && !isPromote) return false;
         if (fechasFilterState === 2 && isPromote) return false;
@@ -89,13 +116,14 @@ export function renderFechasTimeline() {
         return true;
     }).map(item => ({
         ...item,
-        name: item.user || item.name,
+        id: item.idRecord,
+        name: item.userName,
         date: `${item.year}-${String(item.month).padStart(2, '0')}-${String(item.day).padStart(2, '0')}`
     }));
 
     filtered.sort((a, b) => {
-        const dateA = new Date(a.year, a.month - 1, a.day || 1);
-        const dateB = new Date(b.year, b.month - 1, b.day || 1);
+        const dateA = new Date(a.year, getMonthIndex(a.month), a.day || 1);
+        const dateB = new Date(b.year, getMonthIndex(b.month), b.day || 1);
         return datesOrder === 'desc' ? dateB - dateA : dateA - dateB;
     });
 
@@ -110,7 +138,7 @@ export function selectRolesFilter(role) {
 
 export function toggleOldBadgeView() {
     setUseOldBadgeInRoles(!useOldBadgeInRoles);
-    
+
     const imgToggle = document.getElementById("img-old-badge-toggle");
     const lblToggle = document.getElementById("lbl-old-badge-toggle");
 
@@ -135,12 +163,13 @@ export function renderRolesTimeline() {
         oldBadgeWrapper.classList.toggle("hidden", !isAdvisorOrAll);
     }
 
-    let filtered = historyData.filter(i => {
+    let filtered = registros.filter(i => {
         if (currentRoleFilter === "all") return true;
         return i.role.toLowerCase() === currentRoleFilter.toLowerCase();
     }).map(item => ({
         ...item,
-        name: item.user || item.name,
+        id: item.idRecord,
+        name: item.userName,
         date: item.dateStr || `${item.day}/${item.month}/${item.year}`,
         useOldBadge: useOldBadgeInRoles
     }));
@@ -154,7 +183,7 @@ export function renderNacionalidades() {
     if (!grid) return;
     grid.innerHTML = "";
 
-    let countries = [...new Set(historyData.map(i => i.country))];
+    let countries = [...new Set(registros.map(i => i.country).filter(Boolean))];
     countries.forEach(c => {
         let btn = document.createElement("button");
         btn.className = "country-btn";
@@ -168,11 +197,12 @@ export function showCountryRecords(country) {
     const container = document.getElementById("country-timeline-container");
     if (!container) return;
 
-    let records = historyData
+    let records = registros
         .filter(i => i.country === country)
         .map(item => ({
             ...item,
-            name: item.user || item.name,
+            id: item.idRecord,
+            name: item.userName,
             date: item.dateStr || `${item.day}/${item.month}/${item.year}`
         }));
 
@@ -195,17 +225,19 @@ export function executeSearch() {
         return;
     }
 
-    let results = historyData.filter(i => 
-        (i.user && i.user.toLowerCase().includes(q)) || 
-        (i.name && i.name.toLowerCase().includes(q)) || 
-        String(i.id).includes(q) || 
-        (i.oldNames && i.oldNames.some(old => old.toLowerCase().includes(q)))
-    ).map(item => ({
-        ...item,
-        name: item.user || item.name,
-        previousNames: item.oldNames,
-        date: item.dateStr || `${item.day}/${item.month}/${item.year}`
-    }));
+    let results = registros.filter(i => 
+        (i.userName && i.userName.toLowerCase().includes(q)) || 
+        String(i.userId).includes(q)
+    ).map(item => {
+        const u = usuarios.find(usr => String(usr.userId) === String(item.userId));
+        return {
+            ...item,
+            id: item.idRecord,
+            name: item.userName,
+            previousNames: u ? u.oldNames : [],
+            date: item.dateStr || `${item.day}/${item.month}/${item.year}`
+        };
+    });
 
     renderSearchComponent(container, results, isAdminModeActive);
     attachCardEvents(container);
@@ -214,17 +246,18 @@ export function executeSearch() {
 export function renderEstadisticas() {
     const totalProm = document.getElementById("stat-total-promotes");
     const totalDem = document.getElementById("stat-total-demotes");
-    if (totalProm) totalProm.textContent = historyData.filter(i => isPromoteRole(i.role)).length;
-    if (totalDem) totalDem.textContent = historyData.filter(i => !isPromoteRole(i.role)).length;
+
+    if (totalProm) totalProm.textContent = registros.filter(i => i.type === "promote" || isPromoteRole(i.role)).length;
+    if (totalDem) totalDem.textContent = registros.filter(i => i.type === "demote" || !isPromoteRole(i.role)).length;
 
     const breakdown = document.getElementById("stats-yearly-breakdown");
     if (!breakdown) return;
     breakdown.innerHTML = "";
 
     let yearlyCount = {};
-    historyData.forEach(i => {
+    registros.forEach(i => {
         if (!yearlyCount[i.year]) yearlyCount[i.year] = { promote: 0, demote: 0 };
-        const isPromote = isPromoteRole(i.role);
+        const isPromote = i.type === "promote" || isPromoteRole(i.role);
         if (isPromote) yearlyCount[i.year].promote++;
         else yearlyCount[i.year].demote++;
     });
@@ -241,7 +274,7 @@ export function renderEstadisticas() {
     });
 }
 
-// GATEKEEPERS EN INTRODUCCIÓN (CON BOTÓN DE ELIMINAR MIEMBRO)
+// RENDEREAR USUARIOS EN LA PESTAÑA GATEKEEPERS (CON ID DE JUGADOR SIEMPRE VISIBLE)
 export function renderGatekeepers() {
     const mList = document.getElementById("gk-list-moderators");
     const aList = document.getElementById("gk-list-advisors");
@@ -250,50 +283,53 @@ export function renderGatekeepers() {
     if (!mList) return;
     mList.innerHTML = ""; if (aList) aList.innerHTML = ""; if (lList) lList.innerHTML = "";
 
-    gatekeepersList.forEach(gk => {
+    usuarios.forEach(u => {
         let item = document.createElement("div");
         item.className = "gk-item";
 
         let deleteBtn = '';
         if (isAdminModeActive) {
             deleteBtn = `
-                <button class="btn-card-action btn-delete-member" data-id="${gk.id}" title="Eliminar Miembro" style="margin-left:auto;">
-                    <img src="assets/delete.png" alt="Eliminar">
+                <button class="btn-card-action btn-delete-user" data-userid="${u.userId}" title="Eliminar usuario y TODO su historial" style="margin-left:auto;">
+                    <img src="assets/delete.png" alt="Eliminar Usuario">
                 </button>
             `;
         }
 
+        const oldNamesText = u.oldNames && u.oldNames.length > 0 ? `<div style="font-size:0.75rem; color:var(--text-muted)">Antes: ${u.oldNames.join(", ")}</div>` : '';
+
         item.innerHTML = `
-            <img src="${getRoleBadge(gk.role)}" class="badge-img" alt="${gk.role}" title="${gk.role}">
+            <img src="${getRoleBadge(u.currentRole)}" class="badge-img" alt="${u.currentRole}" title="${u.currentRole}">
             <div>
-                <strong>${gk.name || gk.user}</strong>
-                <div style="font-size:0.8rem; color:var(--text-muted)">ID: ${gk.id}</div>
+                <strong>${u.currentName}</strong> <span style="font-size:0.85rem; color:var(--text-muted);">(ID: ${u.userId})</span>
+                <div style="font-size:0.8rem; color:var(--text-muted)">País: ${u.country}</div>
+                ${oldNamesText}
             </div>
             ${deleteBtn}
         `;
 
-        if (gk.role === "Moderator") mList.appendChild(item);
-        else if (gk.role === "Rating Advisor" && aList) aList.appendChild(item);
-        else if (gk.role === "Leaderboard Mod" && lList) lList.appendChild(item);
+        if (u.currentRole === "Moderator") mList.appendChild(item);
+        else if (u.currentRole === "Rating Advisor" && aList) aList.appendChild(item);
+        else if (u.currentRole === "Leaderboard Mod" && lList) lList.appendChild(item);
     });
 
-    // Adjuntar evento de eliminación a los miembros en la pestaña de introducción
-    document.querySelectorAll('.btn-delete-member').forEach(btn => {
+    // Eventos para eliminar usuario
+    document.querySelectorAll('.btn-delete-user').forEach(btn => {
         btn.onclick = (e) => {
             e.stopPropagation();
-            const id = btn.getAttribute('data-id');
-            quickDeleteMember(id);
+            const uId = btn.getAttribute('data-userid');
+            openDeleteUsuarioModal(uId);
         };
     });
 }
 
-// Adjuntar eventos de Editar/Eliminar en las tarjetas del timeline
+// Adjuntar eventos de Editar/Eliminar en las tarjetas de registros
 function attachCardEvents(parent) {
     parent.querySelectorAll('.btn-edit-record').forEach(btn => {
         btn.onclick = (e) => {
             e.stopPropagation();
             const id = btn.getAttribute('data-id');
-            prepareEditMember(id);
+            openEditRegistroModal(id);
         };
     });
 
@@ -301,9 +337,15 @@ function attachCardEvents(parent) {
         btn.onclick = (e) => {
             e.stopPropagation();
             const id = btn.getAttribute('data-id');
-            quickDeleteRecord(id);
+            openDeleteRegistroModal(id);
         };
     });
+}
+
+function getMonthIndex(monthName) {
+    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const idx = months.indexOf(monthName);
+    return idx !== -1 ? idx : 0;
 }
 
 // AJUSTES RÁPIDOS
