@@ -1,6 +1,6 @@
 // admin.js
 import { assetPaths } from './config.js';
-import { registros, usuarios, syncUsuariosFromRegistros } from './state.js';
+import { registros, usuarios, syncUsuariosFromRegistros, updateOrAddUser, setCountryFlag } from './state.js';
 import { renderGatekeepers, renderFechasTimeline, renderRolesTimeline, setIsAdminModeActive } from './ui.js';
 import { guardarEnLocalStorage } from './storage.js';
 
@@ -15,17 +15,37 @@ const ROLE_ASSETS = {
     'Ex Moderator': 'assets/ex_moderator.png',
 };
 
-export function toggleAdminPanel(enabled) {
-    document.getElementById("admin-panel")?.classList.toggle("hidden", !enabled);
-    setIsAdminModeActive(enabled);
+// Control para mostrar/ocultar la barra lateral de administración
+export function initSidebarAdmin() {
+    const btnSideToggle = document.getElementById("btn-side-admin-toggle");
+    const sidebar = document.getElementById("admin-panel-sidebar");
+    const btnClose = document.getElementById("btn-close-admin-sidebar");
+
+    if (btnSideToggle && sidebar) {
+        btnSideToggle.addEventListener("click", () => {
+            const isHidden = sidebar.classList.contains("hidden");
+            sidebar.classList.toggle("hidden", !isHidden);
+            setIsAdminModeActive(isHidden);
+        });
+    }
+
+    if (btnClose && sidebar) {
+        btnClose.addEventListener("click", () => {
+            sidebar.classList.add("hidden");
+            setIsAdminModeActive(false);
+        });
+    }
 }
 
 export function setupRoleSelectors() {
+    initSidebarAdmin();
     setupRolePicker("add");
     setupRolePicker("edit");
+    setupRolePicker("user");
 
     setupTextManager();
     setupAssetSelector();
+    setupFlagManager();
     setupModalEvents();
 }
 
@@ -79,21 +99,66 @@ function setupRolePicker(prefix, currentRole = "Rating Advisor") {
 }
 
 /* ===================================================
-   1. AGREGAR REGISTRO (CREA/ACTUALIZA USUARIOS)
+   1. REGISTROS Y ACCIONES DE USUARIO
    =================================================== */
-export function adminAddRegistro() {
-    const userName = document.getElementById("add-name")?.value.trim();
-    const userId = document.getElementById("add-id")?.value.trim();
+
+/**
+ * Genera el HTML de los botones de acción para cada fila de usuario/registro (Settings + Delete)
+ */
+export function renderUserActionButtons(userId, recordId = null) {
+    const editBtnHtml = `
+        <button class="btn-icon-action btn-edit-user" onclick="openEditUsuarioModal('${userId}')" title="Editar Usuario">
+            <img src="assets/settings.png" alt="Editar">
+        </button>`;
+
+    const deleteTarget = recordId ? `openDeleteRegistroModal('${recordId}')` : `openDeleteUsuarioModal('${userId}')`;
+    const deleteBtnHtml = `
+        <button class="btn-icon-action btn-delete" onclick="${deleteTarget}" title="Eliminar">
+            <img src="assets/other.png" alt="Eliminar" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23ff4d4d\'><path d=\'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z\'/></svg>';">
+        </button>`;
+
+    return `<div class="user-actions">${editBtnHtml}${deleteBtnHtml}</div>`;
+}
+
+// Guardar o Crear Usuario Individual
+export function adminSaveUser() {
+    const userId = document.getElementById("admin-user-id")?.value.trim();
+    const currentName = document.getElementById("admin-user-name")?.value.trim();
+    const country = document.getElementById("admin-user-country")?.value.trim() || "Global";
+    const oldNamesInput = document.getElementById("admin-user-oldnames")?.value.trim();
+    const currentRole = document.getElementById("btn-trigger-user-role")?.getAttribute("data-selected-role") || "Rating Advisor";
+
+    if (!userId || !currentName) {
+        return alert("El ID de Usuario y el Nombre Actual son obligatorios.");
+    }
+
+    const oldNames = oldNamesInput ? oldNamesInput.split(',').map(n => n.trim()).filter(Boolean) : [];
+
+    updateOrAddUser({
+        userId,
+        currentName,
+        currentRole,
+        country,
+        oldNames
+    });
+
+    guardarEnLocalStorage(registros, usuarios);
+    renderGatekeepers();
+    alert("Usuario guardado/actualizado correctamente.");
+}
+
+// Crear Registro Vinculado
+export function adminAddRegistroSeparated() {
+    const userId = document.getElementById("add-record-userid")?.value.trim();
+    const userName = document.getElementById("add-record-username")?.value.trim();
     const role = document.getElementById("btn-trigger-add-role")?.getAttribute("data-selected-role") || "Rating Advisor";
     const dateVal = document.getElementById("add-date")?.value;
-    const country = document.getElementById("add-country")?.value.trim() || "Global";
 
-    if (!userName || !userId || !dateVal || !role) {
-        return alert("Completa todos los campos obligatorios (Nombre, ID, Rol y Fecha).");
+    if (!userId || !userName || !dateVal || !role) {
+        return alert("Completa todos los campos obligatorios.");
     }
 
     const type = role.startsWith("Ex ") ? "demote" : "promote";
-
     const d = new Date(dateVal);
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -103,21 +168,19 @@ export function adminAddRegistro() {
 
     const nuevoRegistro = {
         idRecord: 'rec_' + Date.now(),
-        userId: userId,
-        userName: userName,
-        role: role,
-        type: type,
+        userId,
+        userName,
+        role,
+        type,
         year: d.getFullYear().toString(),
         month: monthNames[d.getMonth()],
         day: d.getDate().toString(),
-        hours: hours,
-        minutes: minutes,
-        dateStr: dateFormatted,
-        country: country
+        hours,
+        minutes,
+        dateStr: dateFormatted
     };
 
     registros.push(nuevoRegistro);
-
     syncUsuariosFromRegistros();
     guardarEnLocalStorage(registros, usuarios);
 
@@ -125,13 +188,35 @@ export function adminAddRegistro() {
     renderFechasTimeline();
     renderRolesTimeline();
 
-    alert("Registro agregado con éxito. El usuario se ha actualizado automáticamente.");
+    alert("Registro guardado con éxito.");
 }
 
 /* ===================================================
-   2. GESTIÓN DE MODALES CUSTOM (ELIMINAR Y EDITAR)
+   2. GESTIÓN DE BANDERAS
    =================================================== */
+function setupFlagManager() {
+    const btnSaveFlag = document.getElementById('btn-admin-save-flag');
+    if (!btnSaveFlag) return;
 
+    btnSaveFlag.addEventListener('click', () => {
+        const country = document.getElementById('admin-flag-country')?.value.trim();
+        const code = document.getElementById('admin-flag-code')?.value.trim();
+        const customUrl = document.getElementById('admin-flag-url')?.value.trim();
+
+        if (!country) return alert("Ingresa el nombre del país.");
+
+        setCountryFlag(country, code, customUrl);
+        renderGatekeepers();
+        renderFechasTimeline();
+        renderRolesTimeline();
+
+        alert(`Configuración de bandera para ${country} guardada.`);
+    });
+}
+
+/* ===================================================
+   3. MODALES CUSTOM
+   =================================================== */
 function setupModalEvents() {
     const modalDelete = document.getElementById('modal-delete');
     const modalEdit = document.getElementById('modal-edit');
@@ -149,7 +234,6 @@ function setupModalEvents() {
         modalUserEdit?.classList.add('hidden');
     });
 
-    // Confirmación de Eliminación
     document.getElementById('btn-modal-confirm-delete')?.addEventListener('click', () => {
         if (!targetDeleteId) return;
 
@@ -174,13 +258,11 @@ function setupModalEvents() {
         modalDelete?.classList.add('hidden');
     });
 
-    // Guardar Edición de Usuario Individual
     document.getElementById('btn-modal-save-user-edit')?.addEventListener('click', () => {
         const userId = document.getElementById('modal-edit-user-id').value;
         const newName = document.getElementById('modal-edit-user-name').value.trim();
         const newCountry = document.getElementById('modal-edit-user-country').value.trim();
 
-        // Actualiza todos los registros asociados al usuario
         registros.forEach(r => {
             if (String(r.userId) === String(userId)) {
                 if (newName) r.userName = newName;
@@ -198,7 +280,6 @@ function setupModalEvents() {
         modalUserEdit?.classList.add('hidden');
     });
 
-    // Guardar Edición de Registro
     document.getElementById('btn-modal-save-edit')?.addEventListener('click', () => {
         const idRecord = document.getElementById('modal-edit-id').value;
         const name = document.getElementById('modal-edit-name').value.trim();
@@ -239,7 +320,6 @@ function setupModalEvents() {
     });
 }
 
-// Abrir Modal para Editar Usuario Individualmente
 export function openEditUsuarioModal(userId) {
     const userObj = usuarios.find(u => String(u.userId) === String(userId));
     if (!userObj) return;
@@ -251,16 +331,14 @@ export function openEditUsuarioModal(userId) {
     document.getElementById('modal-edit-user')?.classList.remove('hidden');
 }
 
-// Abrir Modal de Confirmación para Eliminar Registro Individual
 export function openDeleteRegistroModal(idRecord) {
     targetDeleteId = idRecord;
     deleteCategory = 'registro';
     document.getElementById('modal-delete-title').textContent = '¿Eliminar Registro?';
-    document.getElementById('modal-delete-msg').textContent = `¿Estás seguro de eliminar este registro específico del historial?`;
+    document.getElementById('modal-delete-msg').textContent = `¿Estás seguro de eliminar este registro específico?`;
     document.getElementById('modal-delete')?.classList.remove('hidden');
 }
 
-// Abrir Modal para Eliminar Usuario y TODOS sus Registros en Cascada
 export function openDeleteUsuarioModal(userId) {
     targetDeleteId = userId;
     deleteCategory = 'usuario';
@@ -273,7 +351,6 @@ export function openDeleteUsuarioModal(userId) {
     document.getElementById('modal-delete')?.classList.remove('hidden');
 }
 
-// Abrir Modal de Edición de Registro
 export function openEditRegistroModal(idRecord) {
     const reg = registros.find(r => String(r.idRecord) === String(idRecord));
     if (!reg) return;

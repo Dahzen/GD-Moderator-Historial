@@ -11,13 +11,11 @@
     <!-- ENCABEZADO Y PESTAÑAS SUPERIORES -->
     <header class="navbar-header">
         <nav class="nav-container">
-            <!-- 0. Gatekeepers -->
             <button class="nav-btn active" id="btn-gatekeepers" data-tab="tab-intro">
                 <img src="assets/modlist.png" class="icon-small" alt="Gatekeepers">
                 <span>Gatekeepers</span>
             </button>
 
-            <!-- 1. Fechas -->
             <div class="dropdown">
                 <button class="nav-btn" id="btn-fechas" data-tab="tab-fechas">
                     <img src="assets/calendary.png" class="icon-small" alt="Calendario" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2300f0ff\'><path d=\'M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z\'/></svg>';">
@@ -37,7 +35,6 @@
                 </div>
             </div>
 
-            <!-- 2. Roles -->
             <div class="dropdown">
                 <button class="nav-btn" id="btn-roles" data-tab="tab-roles">
                     <img src="assets/rating_advisor.png" class="icon-small" alt="Roles">
@@ -59,25 +56,21 @@
                 </div>
             </div>
 
-            <!-- 3. Nacionalidad -->
             <button class="nav-btn" id="btn-nacionalidad" data-tab="tab-nacionalidad">
                 <img src="assets/country.png" class="icon-small" alt="Nacionalidad">
                 <span>Nacionalidad</span>
             </button>
 
-            <!-- 4. Buscador -->
             <button class="nav-btn" id="btn-buscador" data-tab="tab-buscador">
                 <img src="assets/search.png" class="icon-small" alt="Buscador">
                 <span>Buscador</span>
             </button>
 
-            <!-- 5. Otros -->
             <button class="nav-btn" id="btn-otros" data-tab="tab-otros">
                 <img src="assets/other.png" class="icon-small" alt="Otros">
                 <span>Otros</span>
             </button>
 
-            <!-- 6. Ajustes -->
             <button class="nav-btn" id="btn-ajustes" data-tab="tab-ajustes">
                 <img src="assets/settings.png" class="icon-small" alt="Ajustes">
                 <span>Ajustes</span>
@@ -90,9 +83,128 @@
         </div>
     </header>
 
-    <main class="main-content">
+    <!-- BOTÓN FLOTANTE LATERAL PARA PANEL ADMIN -->
+    <button id="btn-side-admin-toggle" class="side-admin-btn" title="Abrir Panel de Administración">
+        <img src="assets/settings.png" alt="Admin Mode">
+    </button>
 
-        <!-- PESTAÑA: GATEKEEPERS / INTRODUCCIÓN -->
+    <!-- PANEL ADMIN LATERAL (DRAWER / OVERLAY) -->
+    <aside id="admin-panel-sidebar" class="admin-sidebar hidden">
+        <div class="admin-sidebar-header">
+            <h3>Modo Administrador</h3>
+            <button id="btn-close-admin-sidebar" class="btn-close-sidebar">&times;</button>
+        </div>
+
+        <div class="admin-sidebar-content">
+            <!-- GESTOR DE TEXTOS -->
+            <div class="admin-section">
+                <h3>Gestor de Textos e Información</h3>
+                <select id="admin-info-target" style="width:100%; margin-bottom:12px;">
+                    <option value="header_main">Encabezado Principal (GD Promoted History)</option>
+                    <option value="header_sub">Subtítulo Encabezado</option>
+                    <option value="intro_about_title">Pestaña Intro: Título "Acerca del Documento"</option>
+                    <option value="intro_about_desc">Pestaña Intro: Descripción "Acerca del Documento"</option>
+                    <option value="tab_fechas_desc">Pestaña Fechas: Descripción</option>
+                    <option value="tab_roles_desc">Pestaña Roles: Descripción</option>
+                    <option value="tab_country_desc">Pestaña Nacionalidad: Descripción</option>
+                    <option value="tab_search_desc">Pestaña Buscador: Placeholder</option>
+                </select>
+
+                <textarea id="admin-info-text" placeholder="Escribe el nuevo texto..." style="width:100%; min-height:80px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid var(--border-glow); padding:0.8rem; margin-bottom:12px;"></textarea>
+
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-action" id="btn-admin-info-save">Guardar Cambios</button>
+                    <button class="btn-action btn-secondary" id="btn-admin-info-reset">Restablecer</button>
+                    <button class="btn-action btn-danger" id="btn-admin-info-clear">Vaciar Texto</button>
+                </div>
+            </div>
+
+            <!-- ASSETS / ICONOS Y BANDERAS -->
+            <div class="admin-section">
+                <h3>Modificar Assets / Iconos / Banderas</h3>
+                <div class="role-selector-container" style="margin-bottom:12px;">
+                    <div class="role-selector-wrapper" style="width:100%;">
+                        <button type="button" class="btn-role-trigger" id="btn-trigger-asset-select" data-selected-asset="moderator.png" style="width:100%; justify-content:flex-start; gap:10px; padding:8px 12px;">
+                            <img src="assets/moderator.png" alt="Asset" id="img-selected-asset" class="badge-img">
+                            <span id="lbl-selected-asset" style="font-family:var(--font-heading); color:#fff;">moderator.png</span>
+                        </button>
+
+                        <div class="role-options-popup hidden" id="popup-asset-select" style="width:100%; max-height:200px; overflow-y:auto;">
+                            <button type="button" class="asset-option-btn" data-asset="moderator.png"><img src="assets/moderator.png" class="badge-img"> <span>moderator.png</span></button>
+                            <button type="button" class="asset-option-btn" data-asset="rating_advisor.png"><img src="assets/rating_advisor.png" class="badge-img"> <span>rating_advisor.png</span></button>
+                            <button type="button" class="asset-option-btn" data-asset="leaderboard_Mod.png"><img src="assets/leaderboard_Mod.png" class="badge-img"> <span>leaderboard_Mod.png</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="text" id="admin-asset-url" placeholder="Ruta o URL (ej: assets/nuevo.png)">
+                
+                <div style="display:flex; gap:8px; margin-top:12px; margin-bottom:1rem;">
+                    <button class="btn-action" id="btn-admin-asset-save">Actualizar Asset</button>
+                    <button class="btn-action btn-secondary" id="btn-admin-asset-reset">Restablecer Asset</button>
+                </div>
+
+                <h4 style="margin: 1rem 0 0.5rem 0; color:var(--text-glow);">Banderas Personalizadas por País</h4>
+                <div style="display:flex; gap:8px; margin-bottom:8px;">
+                    <input type="text" id="admin-flag-country" placeholder="Nombre País (ej: México)" style="width:50%;">
+                    <input type="text" id="admin-flag-code" placeholder="Código ISO (ej: mx)" style="width:50%;">
+                </div>
+                <input type="text" id="admin-flag-url" placeholder="URL Personalizada (Opcional)" style="width:100%; margin-bottom:8px;">
+                <button class="btn-action" id="btn-admin-save-flag">Guardar Bandera</button>
+            </div>
+
+            <!-- GESTIÓN DE USUARIOS -->
+            <div class="admin-section">
+                <h3>Gestión de Usuarios</h3>
+                <div style="display:flex; gap:8px; margin-bottom:8px;">
+                    <input type="text" id="admin-user-id" placeholder="ID de Usuario" style="width:50%;">
+                    <input type="text" id="admin-user-name" placeholder="Nombre Actual" style="width:50%;">
+                </div>
+                
+                <div style="display:flex; gap:8px; margin-bottom:8px;">
+                    <input type="text" id="admin-user-country" placeholder="País (ej: México)" style="width:50%;">
+                    <input type="text" id="admin-user-oldnames" placeholder="Nombres antiguos (sep. por coma)" style="width:50%;">
+                </div>
+
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:0.85rem; color:var(--text-muted);">Rol Actual:</label>
+                    <div class="role-selector-wrapper">
+                        <button type="button" class="btn-role-trigger" id="btn-trigger-user-role" data-selected-role="Rating Advisor">
+                            <img src="assets/rating_advisor.png" alt="Rol" id="img-selected-user-role">
+                        </button>
+                        <div class="role-options-popup hidden" id="popup-user-role"></div>
+                    </div>
+                </div>
+
+                <button class="btn-action" id="btn-admin-save-user">Guardar / Crear Usuario</button>
+            </div>
+
+            <!-- GESTIÓN DE REGISTROS HISTÓRICOS -->
+            <div class="admin-section">
+                <h3>Agregar Registro Histórico</h3>
+                <input type="text" id="add-record-userid" placeholder="ID de Usuario" style="margin-bottom:8px; width:100%;">
+                <input type="text" id="add-record-username" placeholder="Username en ese momento" style="margin-bottom:8px; width:100%;">
+
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:0.85rem; color:var(--text-muted);">Rol Obtenido:</label>
+                    <div class="role-selector-wrapper">
+                        <button type="button" class="btn-role-trigger" id="btn-trigger-add-role" data-selected-role="Rating Advisor">
+                            <img src="assets/rating_advisor.png" alt="Rol" id="img-selected-add-role">
+                        </button>
+                        <div class="role-options-popup hidden" id="popup-add-role"></div>
+                    </div>
+                </div>
+
+                <label style="font-size:0.85rem; color:var(--text-muted);">Fecha y Hora Exacta:</label>
+                <input type="datetime-local" id="add-date" style="margin-bottom:12px; width:100%;">
+
+                <button class="btn-action" id="btn-admin-add-record">Crear Registro</button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <!-- PESTAÑA: GATEKEEPERS -->
         <section id="tab-intro" class="tab-pane active">
             <article class="content-card">
                 <h3>Acerca del Documento</h3>
@@ -222,97 +334,6 @@
                         <option value="'Orbitron', sans-serif">Orbitron (Futurista)</option>
                         <option value="Arial, sans-serif">Arial (Estándar)</option>
                     </select>
-                </div>
-
-                <hr style="border-color:var(--border-glow); margin:2rem 0;">
-
-                <!-- MODO ADMIN -->
-                <label class="switch-container">
-                    <input type="checkbox" id="toggle-admin-switch">
-                    <span class="switch-slider"></span>
-                    <span class="switch-label">Habilitar Modo Admin</span>
-                </label>
-
-                <!-- PANEL ADMIN -->
-                <div id="admin-panel" class="hidden" style="margin-top:1.5rem;">
-                    
-                    <!-- GESTOR DE TEXTOS -->
-                    <div class="admin-section">
-                        <h3>Gestor de Textos e Información</h3>
-                        <select id="admin-info-target" style="width:100%; margin-bottom:12px;">
-                            <option value="header_main">Encabezado Principal (GD Promoted History)</option>
-                            <option value="header_sub">Subtítulo Encabezado</option>
-                            <option value="intro_about_title">Pestaña Intro: Título "Acerca del Documento"</option>
-                            <option value="intro_about_desc">Pestaña Intro: Descripción "Acerca del Documento"</option>
-                            <option value="tab_fechas_desc">Pestaña Fechas: Descripción</option>
-                            <option value="tab_roles_desc">Pestaña Roles: Descripción</option>
-                            <option value="tab_country_desc">Pestaña Nacionalidad: Descripción</option>
-                            <option value="tab_search_desc">Pestaña Buscador: Placeholder</option>
-                        </select>
-
-                        <textarea id="admin-info-text" placeholder="Escribe el nuevo texto..." style="width:100%; min-height:90px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid var(--border-glow); padding:0.8rem; margin-bottom:12px;"></textarea>
-
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn-action" id="btn-admin-info-save">Guardar Cambios</button>
-                            <button class="btn-action btn-secondary" id="btn-admin-info-reset">Restablecer</button>
-                            <button class="btn-action btn-danger" id="btn-admin-info-clear">Vaciar Texto</button>
-                        </div>
-                    </div>
-
-                    <!-- ASSETS / ICONOS -->
-                    <div class="admin-section">
-                        <h3>Modificar Assets / Iconos</h3>
-                        <div class="role-selector-container" style="margin-bottom:12px;">
-                            <div class="role-selector-wrapper" style="width:100%;">
-                                <button type="button" class="btn-role-trigger" id="btn-trigger-asset-select" data-selected-asset="moderator.png" style="width:100%; justify-content:flex-start; gap:10px; padding:8px 12px;">
-                                    <img src="assets/moderator.png" alt="Asset" id="img-selected-asset" class="badge-img">
-                                    <span id="lbl-selected-asset" style="font-family:var(--font-heading); color:#fff;">moderator.png</span>
-                                </button>
-
-                                <div class="role-options-popup hidden" id="popup-asset-select" style="width:100%; max-height:200px; overflow-y:auto;">
-                                    <button type="button" class="asset-option-btn" data-asset="moderator.png"><img src="assets/moderator.png" class="badge-img"> <span>moderator.png</span></button>
-                                    <button type="button" class="asset-option-btn" data-asset="rating_advisor.png"><img src="assets/rating_advisor.png" class="badge-img"> <span>rating_advisor.png</span></button>
-                                    <button type="button" class="asset-option-btn" data-asset="leaderboard_Mod.png"><img src="assets/leaderboard_Mod.png" class="badge-img"> <span>leaderboard_Mod.png</span></button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <input type="text" id="admin-asset-url" placeholder="Ruta o URL (ej: assets/nuevo.png)">
-                        
-                        <div style="display:flex; gap:8px; margin-top:12px;">
-                            <button class="btn-action" id="btn-admin-asset-save">Actualizar Asset</button>
-                            <button class="btn-action btn-secondary" id="btn-admin-asset-reset">Restablecer Asset</button>
-                        </div>
-                    </div>
-
-                    <!-- AGREGAR REGISTRO -->
-                    <div class="admin-section">
-                        <h3>Agregar Nuevo Registro</h3>
-                        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">
-                            No se agregan usuarios directamente. Al registrar un evento, el usuario se crea o actualiza en automático.
-                        </p>
-                        
-                        <input type="text" id="add-name" placeholder="Nombre de Usuario" style="margin-bottom:8px; width:100%;">
-                        <input type="text" id="add-id" placeholder="ID de Usuario (Cuenta GD)" style="margin-bottom:8px; width:100%;">
-                        
-                        <div style="margin-bottom:8px;">
-                            <label style="font-size:0.85rem; color:var(--text-muted);">Rol Asignado:</label>
-                            <div class="role-selector-wrapper">
-                                <button type="button" class="btn-role-trigger" id="btn-trigger-add-role" data-selected-role="Rating Advisor">
-                                    <img src="assets/rating_advisor.png" alt="Rol" id="img-selected-add-role">
-                                </button>
-                                <div class="role-options-popup hidden" id="popup-add-role"></div>
-                            </div>
-                        </div>
-
-                        <label style="font-size:0.85rem; color:var(--text-muted);">Fecha y Hora Exacta:</label>
-                        <input type="datetime-local" id="add-date" style="margin-bottom:8px; width:100%;">
-                        
-                        <input type="text" id="add-country" placeholder="País / Nacionalidad" style="margin-bottom:12px; width:100%;">
-                        
-                        <button class="btn-action" id="btn-admin-add">Crear Registro</button>
-                    </div>
-
                 </div>
             </article>
         </section>

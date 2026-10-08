@@ -60,6 +60,14 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* ===================================================
+   PROTECCIÓN GLOBAL DE IMÁGENES E ICONOS
+   =================================================== */
+img, svg {
+    max-width: 100%;
+    height: auto;
+}
+
 .icon-small {
     width: 20px !important;
     height: 20px !important;
@@ -72,6 +80,15 @@ body {
     height: 26px !important;
     object-fit: contain;
     flex-shrink: 0;
+}
+
+/* Encapsulamiento de imágenes en tarjetas y listas */
+.gk-item img,
+.record-item img,
+.content-card img {
+    max-width: 32px;
+    max-height: 32px;
+    object-fit: contain;
 }
 
 /* ===================================================
@@ -113,7 +130,7 @@ body {
     transition: var(--transition);
 }
 
-.nav-btn:hover {
+.nav-btn:hover, .nav-btn.active {
     background: rgba(0, 210, 254, 0.12);
     border-color: var(--accent-cyan);
     color: var(--accent-cyan);
@@ -249,7 +266,6 @@ body {
     margin-bottom: 0.5rem;
 }
 
-/* Bloque para agrupar días dentro del mes */
 .day-block {
     margin-top: 0.8rem;
     margin-left: 0.8rem;
@@ -310,27 +326,28 @@ body {
 }
 
 /* ===================================================
-   BOTONES DE ACCIÓN RÁPIDA (MÁS GRANDES Y CÓMODOS)
+   BOTONES DE ACCIÓN RÁPIDA
    =================================================== */
 .admin-card-actions {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 8px;
     margin-left: auto;
 }
 
 .btn-card-action {
-    width: 32px;  /* Aumentado de 32px a 38px */
+    width: 32px;
     height: 32px;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid var(--border-color);
     cursor: pointer;
-    padding: 3px;
+    padding: 4px;
     border-radius: var(--radius-sm);
     transition: var(--transition);
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 }
 
 .btn-card-action:hover {
@@ -339,11 +356,103 @@ body {
     box-shadow: 0 0 10px rgba(0, 210, 254, 0.3);
 }
 
-.btn-card-action img {
-    width: 48px;  /* Aumentado de 26px a 30px */
-    height: 48px;
+.btn-card-action img,
+.btn-card-action .badge-img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
+    display: block;
+}
+
+/* ===================================================
+   PANEL LATERAL DE ADMINISTRADOR (SIDEBAR)
+   =================================================== */
+.side-admin-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
+    background: var(--bg-header);
+    border: 2px solid var(--accent-yellow);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(245, 158, 11, 0.3);
+    cursor: pointer;
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.side-admin-btn:hover {
+    transform: scale(1.1) rotate(30deg);
+    box-shadow: 0 0 18px rgba(245, 158, 11, 0.6);
+}
+
+.side-admin-btn img {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+}
+
+.admin-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 380px;
+    max-width: 90vw;
+    height: 100vh;
+    background-color: var(--bg-header);
+    border-left: 2px solid var(--border-color);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.7);
+    z-index: 1600;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-sidebar.hidden {
+    transform: translateX(100%);
+    display: flex !important; /* Mantiene la animación de slide */
+}
+
+.admin-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.admin-sidebar-header h3 {
+    font-family: var(--font-heading);
+    color: var(--accent-yellow);
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.btn-close-sidebar {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.8rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: var(--transition);
+}
+
+.btn-close-sidebar:hover {
+    color: var(--accent-red);
+}
+
+.admin-sidebar-content {
+    padding: 1.2rem 1.5rem;
+    overflow-y: auto;
+    flex: 1;
 }
 
 /* ===================================================
@@ -506,30 +615,22 @@ input:focus, select:focus, textarea:focus {
     animation: fadeIn 0.15s ease-out;
 }
 
-.role-option-btn {
-    width: 36px;
+.role-option-btn, .asset-option-btn {
     height: 36px;
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 8px;
     cursor: pointer;
     transition: var(--transition);
-    padding: 0;
+    padding: 0 8px;
 }
 
-.role-option-btn:hover, .role-option-btn.active {
+.role-option-btn:hover, .asset-option-btn:hover {
     background-color: var(--card-hover-bg);
     border-color: var(--accent-cyan);
-    transform: scale(1.08);
-}
-
-.role-option-btn img {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
 }
 
 @keyframes fadeIn {
@@ -537,58 +638,7 @@ input:focus, select:focus, textarea:focus {
     to { opacity: 1; transform: translateX(0); }
 }
 
-/* ===================================================
-   SWITCH TOGGLE (MODO ADMIN)
-   =================================================== */
-.switch-container {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    user-select: none;
-}
-
-.switch-container input[type="checkbox"] {
-    display: none;
-}
-
-.switch-slider {
-    position: relative;
-    width: 46px;
-    height: 24px;
-    background-color: #1e293b;
-    border-radius: 20px;
-    border: 1px solid var(--border-color);
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-.switch-slider::before {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 18px;
-    height: 18px;
-    background-color: #ffffff;
-    border-radius: 50%;
-    transition: transform 0.3s ease;
-}
-
-.switch-container input:checked + .switch-slider {
-    background-color: var(--accent-cyan);
-    border-color: var(--accent-cyan);
-}
-
-.switch-container input:checked + .switch-slider::before {
-    transform: translateX(22px);
-}
-
-.switch-label {
-    color: var(--text-main);
-    font-weight: 700;
-}
-
-/* PANEL DE ADMINISTRADOR */
+/* PANEL DE ADMINISTRADOR CONTENEDORES */
 .admin-section {
     border: 1px dashed var(--accent-yellow);
     background-color: rgba(0, 0, 0, 0.3);

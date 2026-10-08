@@ -79,6 +79,7 @@ function initEventListeners() {
     // Panel Administrador
     document.getElementById("toggle-admin-switch")?.addEventListener("change", (e) => Admin.toggleAdminPanel(e.target.checked));
     
-    // Acción para agregar un nuevo registro desde el panel
-    document.getElementById("btn-admin-add")?.addEventListener("click", Admin.adminAddRegistro);
+    // Acciones del Panel Administrador
+    document.getElementById("btn-admin-save-user")?.addEventListener("click", Admin.adminSaveUser);
+    document.getElementById("btn-admin-add-record")?.addEventListener("click", Admin.adminAddRegistroSeparated);
 }
