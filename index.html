@@ -12,13 +12,11 @@
     <header class="navbar-header">
         <nav class="nav-container">
             <button class="nav-btn active" id="btn-gatekeepers" data-tab="tab-intro">
-                <img src="assets/modlist.png" class="icon-small" alt="Gatekeepers">
                 <span>Gatekeepers</span>
             </button>
 
             <div class="dropdown">
                 <button class="nav-btn" id="btn-fechas" data-tab="tab-fechas">
-                    <img src="assets/calendary.png" class="icon-small" alt="Calendario" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2300f0ff\'><path d=\'M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z\'/></svg>';">
                     <span>Fechas</span>
                 </button>
                 <div class="dropdown-content">
@@ -37,42 +35,29 @@
 
             <div class="dropdown">
                 <button class="nav-btn" id="btn-roles" data-tab="tab-roles">
-                    <img src="assets/rating_advisor.png" class="icon-small" alt="Roles">
                     <span>Roles</span>
                 </button>
                 <div class="dropdown-content">
-                    <a href="#" data-filter-role="all">
-                        <img src="assets/country.png" class="icon-small" style="margin-right: 6px;" alt="All">all
-                    </a>
-                    <a href="#" data-filter-role="Rating Advisor">
-                        <img src="assets/rating_advisor.png" class="icon-small" style="margin-right: 6px;" alt="Rating Advisor">Rating Advisor
-                    </a>
-                    <a href="#" data-filter-role="Moderator">
-                        <img src="assets/moderator.png" class="icon-small" style="margin-right: 6px;" alt="Moderator">Moderator
-                    </a>
-                    <a href="#" data-filter-role="Leaderboard Mod">
-                        <img src="assets/leaderboard_Mod.png" class="icon-small" style="margin-right: 6px;" alt="Leaderboard Mod">Leaderboard Mod
-                    </a>
+                    <a href="#" data-filter-role="all">All</a>
+                    <a href="#" data-filter-role="Rating Advisor">Rating Advisor</a>
+                    <a href="#" data-filter-role="Moderator">Moderator</a>
+                    <a href="#" data-filter-role="Leaderboard Mod">Leaderboard Mod</a>
                 </div>
             </div>
 
             <button class="nav-btn" id="btn-nacionalidad" data-tab="tab-nacionalidad">
-                <img src="assets/country.png" class="icon-small" alt="Nacionalidad">
                 <span>Nacionalidad</span>
             </button>
 
             <button class="nav-btn" id="btn-buscador" data-tab="tab-buscador">
-                <img src="assets/search.png" class="icon-small" alt="Buscador">
                 <span>Buscador</span>
             </button>
 
             <button class="nav-btn" id="btn-otros" data-tab="tab-otros">
-                <img src="assets/other.png" class="icon-small" alt="Otros">
-                <span>Otros</span>
+                <span>Estadísticas</span>
             </button>
 
             <button class="nav-btn" id="btn-ajustes" data-tab="tab-ajustes">
-                <img src="assets/settings.png" class="icon-small" alt="Ajustes">
                 <span>Ajustes</span>
             </button>
         </nav>
@@ -84,9 +69,7 @@
     </header>
 
     <!-- BOTÓN FLOTANTE LATERAL PARA PANEL ADMIN -->
-    <button id="btn-side-admin-toggle" class="side-admin-btn" title="Abrir Panel de Administración">
-        <img src="assets/settings.png" alt="Admin Mode">
-    </button>
+    <button id="btn-side-admin-toggle" class="side-admin-btn" title="Abrir Panel de Administración"></button>
 
     <!-- PANEL ADMIN LATERAL (DRAWER / OVERLAY) -->
     <aside id="admin-panel-sidebar" class="admin-sidebar hidden">
@@ -110,47 +93,13 @@
                     <option value="tab_search_desc">Pestaña Buscador: Placeholder</option>
                 </select>
 
-                <textarea id="admin-info-text" placeholder="Escribe el nuevo texto..." style="width:100%; min-height:80px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid var(--border-glow); padding:0.8rem; margin-bottom:12px;"></textarea>
+                <textarea id="admin-info-text" placeholder="Escribe el nuevo texto..." style="width:100%; min-height:80px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid var(--border-subtle); padding:0.8rem; margin-bottom:12px;"></textarea>
 
                 <div style="display:flex; gap:8px;">
                     <button class="btn-action" id="btn-admin-info-save">Guardar Cambios</button>
                     <button class="btn-action btn-secondary" id="btn-admin-info-reset">Restablecer</button>
                     <button class="btn-action btn-danger" id="btn-admin-info-clear">Vaciar Texto</button>
                 </div>
-            </div>
-
-            <!-- ASSETS / ICONOS Y BANDERAS -->
-            <div class="admin-section">
-                <h3>Modificar Assets / Iconos / Banderas</h3>
-                <div class="role-selector-container" style="margin-bottom:12px;">
-                    <div class="role-selector-wrapper" style="width:100%;">
-                        <button type="button" class="btn-role-trigger" id="btn-trigger-asset-select" data-selected-asset="moderator.png" style="width:100%; justify-content:flex-start; gap:10px; padding:8px 12px;">
-                            <img src="assets/moderator.png" alt="Asset" id="img-selected-asset" class="badge-img">
-                            <span id="lbl-selected-asset" style="font-family:var(--font-heading); color:#fff;">moderator.png</span>
-                        </button>
-
-                        <div class="role-options-popup hidden" id="popup-asset-select" style="width:100%; max-height:200px; overflow-y:auto;">
-                            <button type="button" class="asset-option-btn" data-asset="moderator.png"><img src="assets/moderator.png" class="badge-img"> <span>moderator.png</span></button>
-                            <button type="button" class="asset-option-btn" data-asset="rating_advisor.png"><img src="assets/rating_advisor.png" class="badge-img"> <span>rating_advisor.png</span></button>
-                            <button type="button" class="asset-option-btn" data-asset="leaderboard_Mod.png"><img src="assets/leaderboard_Mod.png" class="badge-img"> <span>leaderboard_Mod.png</span></button>
-                        </div>
-                    </div>
-                </div>
-
-                <input type="text" id="admin-asset-url" placeholder="Ruta o URL (ej: assets/nuevo.png)">
-                
-                <div style="display:flex; gap:8px; margin-top:12px; margin-bottom:1rem;">
-                    <button class="btn-action" id="btn-admin-asset-save">Actualizar Asset</button>
-                    <button class="btn-action btn-secondary" id="btn-admin-asset-reset">Restablecer Asset</button>
-                </div>
-
-                <h4 style="margin: 1rem 0 0.5rem 0; color:var(--text-glow);">Banderas Personalizadas por País</h4>
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <input type="text" id="admin-flag-country" placeholder="Nombre País (ej: México)" style="width:50%;">
-                    <input type="text" id="admin-flag-code" placeholder="Código ISO (ej: mx)" style="width:50%;">
-                </div>
-                <input type="text" id="admin-flag-url" placeholder="URL Personalizada (Opcional)" style="width:100%; margin-bottom:8px;">
-                <button class="btn-action" id="btn-admin-save-flag">Guardar Bandera</button>
             </div>
 
             <!-- GESTIÓN DE USUARIOS -->
@@ -168,12 +117,11 @@
 
                 <div style="margin-bottom:12px;">
                     <label style="font-size:0.85rem; color:var(--text-muted);">Rol Actual:</label>
-                    <div class="role-selector-wrapper">
-                        <button type="button" class="btn-role-trigger" id="btn-trigger-user-role" data-selected-role="Rating Advisor">
-                            <img src="assets/rating_advisor.png" alt="Rol" id="img-selected-user-role">
-                        </button>
-                        <div class="role-options-popup hidden" id="popup-user-role"></div>
-                    </div>
+                    <select id="admin-user-role-select" style="margin-top: 4px;">
+                        <option value="Rating Advisor">Rating Advisor</option>
+                        <option value="Moderator">Moderator</option>
+                        <option value="Leaderboard Mod">Leaderboard Mod</option>
+                    </select>
                 </div>
 
                 <button class="btn-action" id="btn-admin-save-user">Guardar / Crear Usuario</button>
@@ -187,12 +135,11 @@
 
                 <div style="margin-bottom:8px;">
                     <label style="font-size:0.85rem; color:var(--text-muted);">Rol Obtenido:</label>
-                    <div class="role-selector-wrapper">
-                        <button type="button" class="btn-role-trigger" id="btn-trigger-add-role" data-selected-role="Rating Advisor">
-                            <img src="assets/rating_advisor.png" alt="Rol" id="img-selected-add-role">
-                        </button>
-                        <div class="role-options-popup hidden" id="popup-add-role"></div>
-                    </div>
+                    <select id="add-record-role-select" style="margin-top: 4px;">
+                        <option value="Rating Advisor">Rating Advisor</option>
+                        <option value="Moderator">Moderator</option>
+                        <option value="Leaderboard Mod">Leaderboard Mod</option>
+                    </select>
                 </div>
 
                 <label style="font-size:0.85rem; color:var(--text-muted);">Fecha y Hora Exacta:</label>
@@ -234,12 +181,12 @@
             <article class="content-card">
                 <h2>Fechas</h2>
                 <p id="desc-fechas">Historial cronológico estructurado por Años, Meses y Días. Utiliza el botón interactivo para filtrar entre ascensos, descensos o ver el registro completo.</p>
-                <select id="select-dates-order">
+                <select id="select-dates-order" style="margin-bottom: 10px;">
                     <option value="desc">Más reciente a más antiguo</option>
                     <option value="asc">Más antiguo a más reciente</option>
                 </select>
                 <button id="btn-toggle-fechas-mode" class="filter-btn-toggle">
-                    <img id="img-toggle-fechas" src="assets/rating_advisor.png" class="badge-img" alt="Filtro">
+                    <span id="img-toggle-fechas-slot"></span>
                     <span id="label-toggle-fechas">Ver solo Ascensos</span>
                 </button>
             </article>
@@ -253,7 +200,7 @@
                 <h2>Filtrado por Roles</h2>
                 <div id="old-badge-wrapper" class="hidden" style="margin-top: 1rem;">
                     <button id="btn-toggle-old-badge" class="filter-btn-toggle">
-                        <img id="img-old-badge-toggle" src="assets/old_badge.png" class="badge-img" alt="Old Badge" onerror="this.onerror=null; this.src='assets/rating_advisor.png';">
+                        <span id="img-old-badge-toggle-slot"></span>
                         <span id="lbl-old-badge-toggle">Ver con Insignia Antigua</span>
                     </button>
                 </div>
@@ -290,11 +237,11 @@
                 <div style="display:flex; gap:1rem; margin-top:1rem;">
                     <div style="flex:1; background:rgba(0,0,0,0.5); padding:1rem; border-left:3px solid var(--accent-green);">
                         <h3 style="margin:0;">Total Ascensos</h3>
-                        <p id="stat-total-promotes" style="font-size:2rem; font-family:var(--font-heading); margin:0; color:var(--accent-green);">0</p>
+                        <p id="stat-total-promotes" style="font-size:2rem; font-family:var(--font-sans); margin:0; color:var(--accent-green);">0</p>
                     </div>
                     <div style="flex:1; background:rgba(0,0,0,0.5); padding:1rem; border-left:3px solid var(--accent-red);">
                         <h3 style="margin:0;">Total Descensos</h3>
-                        <p id="stat-total-demotes" style="font-size:2rem; font-family:var(--font-heading); margin:0; color:var(--accent-red);">0</p>
+                        <p id="stat-total-demotes" style="font-size:2rem; font-family:var(--font-sans); margin:0; color:var(--accent-red);">0</p>
                     </div>
                 </div>
             </article>
@@ -313,8 +260,8 @@
                 <div style="margin-bottom: 1rem;">
                     <label>Tamaño de Letra:</label>
                     <select id="select-font-size">
-                        <option value="16px">Pequeña (16px)</option>
-                        <option value="18px" selected>Normal (18px)</option>
+                        <option value="16px">Normal (16px)</option>
+                        <option value="18px">Mediana (18px)</option>
                         <option value="20px">Grande (20px)</option>
                     </select>
                 </div>
@@ -322,17 +269,8 @@
                 <div style="margin-bottom: 1rem;">
                     <label>Tema Visual:</label>
                     <select id="select-theme">
-                        <option value="dark">Modo Geometry Dash (Oscuro)</option>
+                        <option value="dark" selected>Modo Oscuro</option>
                         <option value="light">Modo Claro</option>
-                    </select>
-                </div>
-
-                <div style="margin-bottom: 1rem;">
-                    <label>Tipografía:</label>
-                    <select id="select-font-family">
-                        <option value="'Rajdhani', sans-serif">Rajdhani (Por defecto)</option>
-                        <option value="'Orbitron', sans-serif">Orbitron (Futurista)</option>
-                        <option value="Arial, sans-serif">Arial (Estándar)</option>
                     </select>
                 </div>
             </article>
@@ -387,12 +325,11 @@
 
             <div style="margin-bottom:10px;">
                 <label style="font-size:0.85rem; color:var(--text-muted);">Rol:</label>
-                <div class="role-selector-wrapper">
-                    <button type="button" class="btn-role-trigger" id="btn-trigger-edit-role" data-selected-role="Rating Advisor">
-                        <img src="assets/rating_advisor.png" alt="Rol" id="img-selected-edit-role">
-                    </button>
-                    <div class="role-options-popup hidden" id="popup-edit-role"></div>
-                </div>
+                <select id="modal-edit-role-select">
+                    <option value="Rating Advisor">Rating Advisor</option>
+                    <option value="Moderator">Moderator</option>
+                    <option value="Leaderboard Mod">Leaderboard Mod</option>
+                </select>
             </div>
 
             <div style="margin-bottom:10px;">
@@ -412,6 +349,6 @@
         </div>
     </div>
 
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

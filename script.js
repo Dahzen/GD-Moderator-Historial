@@ -1,63 +1,78 @@
-// BANCO DE IMÁGENES / ASSETS CON NOMBRES EXACTOS
-let assetPaths = {
-    "calendary.png": "calendary.png",
-    "rating_advisor.png": "rating_advisor.png",
-    "country.png": "country.png",
-    "search.png": "search.png",
-    "other.png": "other.png",
-    "settings.png": "settings.png",
-    "moderator.png": "moderator.png",
-    "leaderboard_Mod.png": "leaderboard_Mod.png",
-    "ex_rating_advisor.png": "ex_rating_advisor.png",
-    "ex_moderator.png": "ex_moderator.png",
-    "old_badge.png": "old_badge.png",
-};
+// script.js
+import { SPRITESHEETS, SPRITE_MAPPINGS, fallbackBadges } from './js/config.js';
+import { initSpriteSheets, getSpriteImage } from './js/spriteSheet.js';
 
-const fallbackBadges = {
-    "Rating Advisor": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffe600'><path d='M12 2L2 22h20L12 2zm0 4l6.5 13h-13L12 6z'/></svg>",
-    "Moderator": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300ff66'><path d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8s0 .01 0 .01z'/></svg>",
-    "Leaderboard Mod": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300f0ff'><path d='M7 19h2v-6H7v6zm4 0h2v-10h-2v10zm4 0h2v-14h-2v14zm4-16v18H3V3h16m2-2H1v22h20V1z'/></svg>"
-};
-
-function getBadgeHTML(role, useOld = false) {
-    let key;
-    
-    switch (role) {
-        case "Rating Advisor":
-            key = useOld ? "old_badge.png" : "rating_advisor.png";
-            break;
-        case "Moderator":
-            key = "moderator.png";
-            break;
-        case "Leaderboard Mod":
-            key = "leaderboard_Mod.png";
-            break;
-        case "Ex Rating Advisor":
-            key = "ex_rating_advisor.png";
-            break;
-        case "Ex Moderator":
-            key = "ex_moderator.png";
-            break;
-        default:
-            key = "moderator.png";
-    }
-
-    let src = assetPaths[key] || key;
-    let fallback = fallbackBadges[role] || fallbackBadges["Moderator"];
-    return `<img src="${src}" class="badge-img" alt="${role}" onerror="this.onerror=null; this.src='${fallback}';">`;
-}
-
-// BASE DE DATOS LOCAL
+// Base de datos local
 let gatekeepersList = [];
 let historyData = [];
 
-// ESTADOS DE NAVEGACIÓN Y FILTROS
+// Estados de navegación y filtros
 let currentFechasYear = "all";
 let fechasFilterState = 0; // 0: Todos, 1: Solo Ascensos, 2: Solo Descensos
 let currentRoleFilter = "all";
 let useOldBadgeInRoles = false;
 
+// Retorna el elemento HTML en string generado desde el Canvas del spritesheet
+function getBadgeHTML(role, useOld = false) {
+    let key = role;
+    if (role === "Rating Advisor" && useOld) {
+        key = "badge_old";
+    }
 
+    const spriteImg = getSpriteImage(key, 24, "badge-img");
+    return spriteImg.outerHTML;
+}
+
+// Inyecta los sprites oficiales en la botonera de la barra superior
+function setupNavbarIcons() {
+    const navButtons = [
+        { id: "btn-gatekeepers", key: "nav_gatekeepers" },
+        { id: "btn-fechas", key: "nav_fechas" },
+        { id: "btn-roles", key: "nav_roles" },
+        { id: "btn-nacionalidad", key: "nav_nacionalidad" },
+        { id: "btn-buscador", key: "nav_buscador" },
+        { id: "btn-otros", key: "nav_otros" },
+        { id: "btn-ajustes", key: "nav_ajustes" }
+    ];
+
+    navButtons.forEach(item => {
+        const btn = document.getElementById(item.id);
+        if (!btn) return;
+
+        const sprite = getSpriteImage(item.key, 18, "icon-small");
+        const existingImg = btn.querySelector("img");
+        if (existingImg) {
+            existingImg.replaceWith(sprite);
+        } else {
+            btn.prepend(sprite);
+        }
+    });
+
+    // Botón flotante Admin
+    const adminToggle = document.getElementById("btn-side-admin-toggle");
+    if (adminToggle) {
+        adminToggle.innerHTML = "";
+        adminToggle.appendChild(getSpriteImage("admin_gear", 24, "icon-small"));
+    }
+
+    // Iconos de los toggles de filtros
+    updateFilterToggleIcons();
+}
+
+function updateFilterToggleIcons() {
+    const slotFechas = document.getElementById("img-toggle-fechas-slot");
+    if (slotFechas) {
+        slotFechas.innerHTML = "";
+        let role = (fechasFilterState === 2) ? "Leaderboard Mod" : (fechasFilterState === 1 ? "Moderator" : "Rating Advisor");
+        slotFechas.appendChild(getSpriteImage(role, 20, "badge-img"));
+    }
+
+    const slotOld = document.getElementById("img-old-badge-toggle-slot");
+    if (slotOld) {
+        slotOld.innerHTML = "";
+        slotOld.appendChild(getSpriteImage(useOldBadgeInRoles ? "Moderator" : "Rating Advisor", 20, "badge-img"));
+    }
+}
 
 function guardarEnLocalStorage() {
     localStorage.setItem("historyData", JSON.stringify(historyData));
@@ -66,7 +81,11 @@ function guardarEnLocalStorage() {
 
 async function cargarDatosJSON() {
     try {
-        // Verificar si existen datos guardados localmente
+        // 1. Inicializar y precargar las 3 hojas de Geometry Dash
+        await initSpriteSheets();
+        setupNavbarIcons();
+
+        // 2. Cargar datos del historial
         const localHistory = localStorage.getItem("historyData");
         const localGatekeepers = localStorage.getItem("gatekeepersList");
 
@@ -75,9 +94,9 @@ async function cargarDatosJSON() {
             gatekeepersList = JSON.parse(localGatekeepers);
         } else {
             const [resGeneral, resNaciones, resFechas] = await Promise.all([
-                fetch('registro_general.json'),
-                fetch('nacionalidad.json'),
-                fetch('fechas_ascensos.json')
+                fetch('data/registro_general.json'),
+                fetch('data/nacionalidad.json'),
+                fetch('data/fechas_ascensos.json')
             ]);
 
             const generalData = await resGeneral.json();
@@ -116,18 +135,21 @@ async function cargarDatosJSON() {
         renderRolesTimeline();
 
     } catch (error) {
-        console.error("Error al cargar las bases de datos JSON:", error);
+        console.error("Error al inicializar la base de datos o spritesheets:", error);
     }
+    
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    cargarDatosJSON();
-});
-
-// CAMBIO DE PESTAÑAS
+// Cambio de pestañas
 function switchTab(tabId) {
     document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
-    document.getElementById(tabId)?.classList.add("active");
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+
+    const targetTab = document.getElementById(tabId);
+    if (targetTab) targetTab.classList.add("active");
+
+    const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
+    if (activeBtn) activeBtn.classList.add("active");
 
     if (tabId === "tab-fechas") renderFechasTimeline();
     if (tabId === "tab-roles") renderRolesTimeline();
@@ -143,19 +165,13 @@ function selectFechasFilter(year) {
 
 function cycleFechasFilterMode() {
     fechasFilterState = (fechasFilterState + 1) % 3;
-    const imgBtn = document.getElementById("img-toggle-fechas");
     const labelBtn = document.getElementById("label-toggle-fechas");
 
-    if (fechasFilterState === 0) {
-        if (imgBtn) imgBtn.src = assetPaths["rating_advisor.png"];
-        if (labelBtn) labelBtn.textContent = "Ver solo Ascensos";
-    } else if (fechasFilterState === 1) {
-        if (imgBtn) imgBtn.src = assetPaths["ex_rating_advisor.png"];
-        if (labelBtn) labelBtn.textContent = "Ver solo Descensos";
-    } else if (fechasFilterState === 2) {
-        if (imgBtn) imgBtn.src = assetPaths["moderator.png"];
-        if (labelBtn) labelBtn.textContent = "Ver todos los registros";
-    }
+    if (fechasFilterState === 0 && labelBtn) labelBtn.textContent = "Ver solo Ascensos";
+    if (fechasFilterState === 1 && labelBtn) labelBtn.textContent = "Ver solo Descensos";
+    if (fechasFilterState === 2 && labelBtn) labelBtn.textContent = "Ver todos los registros";
+
+    updateFilterToggleIcons();
     renderFechasTimeline();
 }
 
@@ -163,6 +179,8 @@ function renderFechasTimeline() {
     const container = document.getElementById("fechas-timeline-container");
     if (!container) return;
     container.innerHTML = "";
+
+    const order = document.getElementById("select-dates-order")?.value || "desc";
 
     let list = historyData.filter(item => {
         if (currentFechasYear !== "all" && item.year !== currentFechasYear) return false;
@@ -183,7 +201,11 @@ function renderFechasTimeline() {
         grouped[item.year][item.month].push(item);
     });
 
-    Object.keys(grouped).forEach(yr => {
+    let years = Object.keys(grouped);
+    if (order === "desc") years.sort((a, b) => b - a);
+    else years.sort((a, b) => a - b);
+
+    years.forEach(yr => {
         let yearDiv = document.createElement("div");
         yearDiv.className = "year-block";
         yearDiv.innerHTML = `<h2 class="year-title">Año ${yr}</h2>`;
@@ -222,22 +244,14 @@ function selectRolesFilter(role) {
 
 function toggleOldBadgeView() {
     useOldBadgeInRoles = !useOldBadgeInRoles;
-    
-    const imgToggle = document.getElementById("img-old-badge-toggle");
     const lblToggle = document.getElementById("lbl-old-badge-toggle");
-
-    if (useOldBadgeInRoles) {
-        if (imgToggle) imgToggle.src = assetPaths["rating_advisor.png"] || "rating_advisor.png";
-        if (lblToggle) lblToggle.textContent = "Ver con Insignia Actual";
-    } else {
-        if (imgToggle) imgToggle.src = assetPaths["old_badge.png"] || "old_badge.png";
-        if (lblToggle) lblToggle.textContent = "Ver con Insignia Antigua";
+    if (lblToggle) {
+        lblToggle.textContent = useOldBadgeInRoles ? "Ver con Insignia Actual" : "Ver con Insignia Antigua";
     }
-
+    updateFilterToggleIcons();
     renderRolesTimeline();
 }
 
-// Renderizado de Roles corregido
 function renderRolesTimeline() {
     const container = document.getElementById("roles-timeline-container");
     const oldBadgeWrapper = document.getElementById("old-badge-wrapper");
@@ -273,40 +287,13 @@ function renderRolesTimeline() {
     });
 }
 
-function renderRolesTimeline() {
-    const container = document.getElementById("roles-timeline-container");
-    const oldBadgeWrapper = document.getElementById("old-badge-wrapper");
-    if (!container) return;
-    container.innerHTML = "";
-
-    if (oldBadgeWrapper) {
-    // Se muestra si el filtro es "all" o "Rating Advisor"
-    oldBadgeWrapper.classList.toggle("hidden", !(currentRoleFilter === "all" || currentRoleFilter === "Rating Advisor"));
-    }
-
-    let list = historyData.filter(i => currentRoleFilter === "all" || i.role === currentRoleFilter);
-
-    list.forEach(rec => {
-        let card = document.createElement("div");
-        card.className = "record-item";
-        card.innerHTML = `
-            ${getBadgeHTML(rec.role, useOldBadgeInRoles && rec.role === "Rating Advisor")}
-            <div>
-                <strong>${rec.dateStr}</strong> - <strong>${rec.user}</strong> (ID: ${rec.id}) 
-                - Rol: <strong>${rec.role}</strong> (${rec.type === 'promote' ? 'Ascenso' : 'Descenso'})
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
-
-// 3. NACIONALIDAD
+// 3. NACIONALIDADES
 function renderNacionalidades() {
     const grid = document.getElementById("country-grid");
     if (!grid) return;
     grid.innerHTML = "";
 
-    let countries = [...new Set(historyData.map(i => i.country))];
+    let countries = [...new Set(historyData.map(i => i.country))].filter(Boolean);
     countries.forEach(c => {
         let btn = document.createElement("button");
         btn.className = "country-btn";
@@ -319,7 +306,7 @@ function renderNacionalidades() {
 function showCountryRecords(country) {
     const container = document.getElementById("country-timeline-container");
     if (!container) return;
-    container.innerHTML = `<h3 style="color:var(--border-glow)">Registros de: ${country}</h3>`;
+    container.innerHTML = `<h3 style="color:var(--accent-primary); margin-bottom: 12px;">Registros de: ${country}</h3>`;
 
     historyData.filter(i => i.country === country).forEach(rec => {
         let card = document.createElement("div");
@@ -346,8 +333,8 @@ function executeSearch() {
 
     let results = historyData.filter(i => 
         i.user.toLowerCase().includes(q) || 
-        i.id.includes(q) || 
-        i.oldNames.some(old => old.toLowerCase().includes(q))
+        String(i.id).includes(q) || 
+        (i.oldNames && i.oldNames.some(old => old.toLowerCase().includes(q)))
     );
 
     if (results.length === 0) {
@@ -362,7 +349,7 @@ function executeSearch() {
             ${getBadgeHTML(rec.role)}
             <div>
                 <strong>${rec.user}</strong> (ID: ${rec.id})
-                ${rec.oldNames.length ? `<br><small style='color:var(--text-muted)'>Nombres anteriores: ${rec.oldNames.join(", ")}</small>` : ""}
+                ${rec.oldNames && rec.oldNames.length ? `<br><small style='color:var(--text-muted)'>Nombres anteriores: ${rec.oldNames.join(", ")}</small>` : ""}
                 <br><span>Fecha: ${rec.dateStr} | Estado: ${rec.type} [${rec.role}]</span>
             </div>
         `;
@@ -387,13 +374,13 @@ function renderEstadisticas() {
         yearlyCount[i.year][i.type]++;
     });
 
-    Object.keys(yearlyCount).forEach(yr => {
+    Object.keys(yearlyCount).sort((a, b) => b - a).forEach(yr => {
         let div = document.createElement("div");
         div.style.marginBottom = "0.8rem";
         div.innerHTML = `
             <strong>Año ${yr}:</strong> 
-            <span style="color:var(--accent-green)">${yearlyCount[yr].promote} Ascensos</span> | 
-            <span style="color:var(--accent-red)">${yearlyCount[yr].demote} Descensos</span>
+            <span style="color:var(--accent-green)">${yearlyCount[yr].promote || 0} Ascensos</span> | 
+            <span style="color:var(--accent-red)">${yearlyCount[yr].demote || 0} Descensos</span>
         `;
         breakdown.appendChild(div);
     });
@@ -424,128 +411,61 @@ function renderGatekeepers() {
     });
 }
 
-// 6. AJUSTES Y PANEL DE ADMINISTRACIÓN
-function changeFontSize(sz) { document.documentElement.style.setProperty('--base-font-size', sz); }
-function changeTheme(th) { document.body.className = th === 'light' ? 'theme-light' : 'theme-dark'; }
-function changeFontFamily(fn) { document.body.style.fontFamily = fn; }
+// Event Listeners y Handlers al arrancar el DOM
+document.addEventListener("DOMContentLoaded", () => {
+    cargarDatosJSON();
 
-function toggleAdminPanel(enabled) {
-    document.getElementById("admin-panel")?.classList.toggle("hidden", !enabled);
-}
-
-function adminUpdateAsset() {
-    let k = document.getElementById("asset-key")?.value.trim();
-    let u = document.getElementById("asset-url")?.value.trim();
-    if (k && u) {
-        assetPaths[k] = u;
-        alert(`Asset ${k} actualizado.`);
-    }
-}
-
-function adminUpdateInfo() {
-    let t = document.getElementById("admin-info-title")?.value;
-    let st = document.getElementById("admin-info-subtitle")?.value;
-    let d = document.getElementById("admin-info-desc")?.value;
-
-    if (t) document.getElementById("display-title").textContent = t;
-    if (st) document.getElementById("display-subtitle").textContent = st;
-    if (d) document.getElementById("desc-intro").textContent = d;
-
-    alert("Información actualizada correctamente.");
-}
-
-function adminEditMember() {
-    let id = document.getElementById("edit-member-id")?.value;
-    let newName = document.getElementById("edit-member-newname")?.value;
-    let newRole = document.getElementById("edit-member-newrole")?.value;
-    let dateVal = document.getElementById("edit-member-date")?.value;
-
-    let target = historyData.find(i => i.id === id);
-    if (!target) return alert("Usuario no encontrado.");
-
-    if (newName) {
-        if (!target.oldNames.includes(target.user)) target.oldNames.push(target.user);
-        target.user = newName;
-    }
-
-    if (newRole) {
-        if (!dateVal) return alert("Si cambias el rol, debes especificar una fecha obligatoriamente.");
-        let d = new Date(dateVal);
-        let monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-
-        let hours = d.getHours().toString().padStart(2, '0');
-        let minutes = d.getMinutes().toString().padStart(2, '0');
-        let dateFormatted = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()} ${hours}:${minutes}`;
-
-// Asignar dateFormatted a dateStr al crear o modificar el registro:
-// dateStr: dateFormatted
-        historyData.push({
-            year: d.getFullYear().toString(),
-            month: monthNames[d.getMonth()],
-            day: d.getDate().toString(),
-            dateStr: `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} 00:00`,
-            user: target.user,
-            oldNames: target.oldNames,
-            id: target.id,
-            role: newRole,
-            type: "promote",
-            country: target.country
-        });
-    }
-
-    alert("Miembro actualizado.");
-}
-
-function adminAddMember() {
-    let role = document.getElementById("add-role")?.value;
-    let name = document.getElementById("add-name")?.value;
-    let id = document.getElementById("add-id")?.value;
-    let dateVal = document.getElementById("add-date")?.value;
-    let country = document.getElementById("add-country")?.value || "Global";
-
-    if (!name || !id || !dateVal) return alert("Por favor completa los campos requeridos (Nombre, ID, Fecha).");
-
-    let d = new Date(dateVal);
-    let monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-
-    let hours = d.getHours().toString().padStart(2, '0');
-    let minutes = d.getMinutes().toString().padStart(2, '0');
-    let dateFormatted = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()} ${hours}:${minutes}`;
-
-    // Asignar dateFormatted a dateStr al crear o modificar el registro:
-    // dateStr: dateFormatted
-
-    historyData.push({
-        year: d.getFullYear().toString(),
-        month: monthNames[d.getMonth()],
-        day: d.getDate().toString(),
-        dateStr: `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} 00:00`,
-        user: name,
-        oldNames: [],
-        id: id,
-        role: role,
-        type: "promote",
-        country: country
+    // Eventos de Navegación por pestañas
+    document.querySelectorAll(".nav-btn[data-tab]").forEach(btn => {
+        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
     });
 
-    gatekeepersList.push({ name: name, id: id, role: role });
-    renderGatekeepers();
+    // Filtros por año en dropdown Fechas
+    document.querySelectorAll("[data-filter-year]").forEach(el => {
+        el.addEventListener("click", (e) => {
+            e.preventDefault();
+            selectFechasFilter(el.dataset.filterYear);
+        });
+    });
 
-    alert("Nuevo miembro agregado correctamente.");
-}
+    // Filtros por rol en dropdown Roles
+    document.querySelectorAll("[data-filter-role]").forEach(el => {
+        el.addEventListener("click", (e) => {
+            e.preventDefault();
+            selectRolesFilter(el.dataset.filterRole);
+        });
+    });
 
-// Exposición global para llamados directos desde el DOM
+    // Toggles de filtros
+    document.getElementById("btn-toggle-fechas-mode")?.addEventListener("click", cycleFechasFilterMode);
+    document.getElementById("btn-toggle-old-badge")?.addEventListener("click", toggleOldBadgeView);
+    document.getElementById("select-dates-order")?.addEventListener("change", renderFechasTimeline);
+    document.getElementById("search-input")?.addEventListener("input", executeSearch);
+
+    // Ajustes visuales
+    document.getElementById("select-font-size")?.addEventListener("change", (e) => {
+        document.documentElement.style.setProperty('--base-font-size', e.target.value);
+    });
+
+    document.getElementById("select-theme")?.addEventListener("change", (e) => {
+        document.body.className = e.target.value === 'light' ? 'theme-light' : 'theme-dark';
+    });
+
+    // Panel lateral de Administrador
+    const sidebar = document.getElementById("admin-panel-sidebar");
+    document.getElementById("btn-side-admin-toggle")?.addEventListener("click", () => {
+        sidebar?.classList.toggle("hidden");
+    });
+
+    document.getElementById("btn-close-admin-sidebar")?.addEventListener("click", () => {
+        sidebar?.classList.add("hidden");
+    });
+});
+
+// Exposición al objeto window para compatibilidad
 window.switchTab = switchTab;
 window.selectFechasFilter = selectFechasFilter;
 window.cycleFechasFilterMode = cycleFechasFilterMode;
 window.selectRolesFilter = selectRolesFilter;
 window.toggleOldBadgeView = toggleOldBadgeView;
 window.executeSearch = executeSearch;
-window.changeFontSize = changeFontSize;
-window.changeTheme = changeTheme;
-window.changeFontFamily = changeFontFamily;
-window.toggleAdminPanel = toggleAdminPanel;
-window.adminUpdateAsset = adminUpdateAsset;
-window.adminUpdateInfo = adminUpdateInfo;
-window.adminEditMember = adminEditMember;
-window.adminAddMember = adminAddMember;
