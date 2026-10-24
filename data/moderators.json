@@ -1,0 +1,74 @@
+[
+  {
+    "id": 7560014,
+    "name": "Agdor",
+    "aliases": ["AgdorGD"],
+    "currentRole": "Rating Advisor",
+    "country": "España",
+    "isGatekeeper": true,
+    "active": true,
+    "history": [
+      {
+        "eventId": "evt_7560014_1",
+        "dateStr": "24/06/2021 18:38",
+        "year": "2021",
+        "month": "Junio",
+        "day": "24",
+        "role": "Moderator",
+        "type": "promote",
+        "note": "Ascenso inicial"
+      },
+      {
+        "eventId": "evt_7560014_2",
+        "dateStr": "07/03/2022 11:19",
+        "year": "2022",
+        "month": "Marzo",
+        "day": "7",
+        "role": "Rating Advisor",
+        "type": "promote",
+        "note": "Ascenso a Rating Advisor"
+      }
+    ]
+  },
+  {
+    "id": 9999999,
+    "name": "TesterUser",
+    "aliases": ["OldTester"],
+    "currentRole": "Moderator",
+    "country": "México",
+    "isGatekeeper": true,
+    "active": true,
+    "history": [
+      {
+        "eventId": "evt_9999999_1",
+        "dateStr": "15/01/2023 12:00",
+        "year": "2023",
+        "month": "Enero",
+        "day": "15",
+        "role": "Moderator",
+        "type": "promote",
+        "note": "Ascenso a Mod"
+      },
+      {
+        "eventId": "evt_9999999_2",
+        "dateStr": "10/06/2024 15:30",
+        "year": "2024",
+        "month": "Junio",
+        "day": "10",
+        "role": "Rating Advisor",
+        "type": "promote",
+        "note": "Ascenso a RA"
+      },
+      {
+        "eventId": "evt_9999999_3",
+        "dateStr": "01/01/2025 00:00",
+        "year": "2025",
+        "month": "Enero",
+        "day": "01",
+        "role": "Moderator",
+        "type": "demote",
+        "note": "Descenso a Mod"
+      }
+    ]
+  }
+]
