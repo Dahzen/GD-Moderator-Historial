@@ -1,85 +1,95 @@
-// main.js
-import { cargarDatosIniciales } from './storage.js';
-import { setRegistros, setUsuarios, syncUsuariosFromRegistros } from './state.js';
-import * as UI from './ui.js';
-import * as Admin from './admin.js';
+// js/main.js
+import { initSpriteSheets } from './spriteSheet.js';
+import { initStorage } from './storage.js';
+import { 
+    setupNavbarIcons, 
+    switchTab, 
+    renderGatekeepers, 
+    renderFechasTimeline, 
+    renderRolesTimeline, 
+    renderEstadisticas, 
+    executeSearch 
+} from './ui.js';
+import { setupAdminAuth } from './admin.js';
+import { currentFilters, updateFilters } from './state.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
-    initEventListeners();
+    // 1. Cargar hojas de sprites y storage
+    await initSpriteSheets();
+    await initStorage();
 
-    try {
-        const { registros: registrosCargados, usuarios: usuariosCargados } = await cargarDatosIniciales();
-        
-        // Asignar registros cargados de storage o JSON
-        if (registrosCargados) setRegistros(registrosCargados);
-        
-        // Si existen usuarios previos los asigna, si no, los sincroniza desde los registros
-        if (usuariosCargados && usuariosCargados.length > 0) {
-            setUsuarios(usuariosCargados);
-        } else {
-            syncUsuariosFromRegistros();
-        }
+    // 2. Montar interfaz inicial
+    setupNavbarIcons();
+    setupAdminAuth();
+    renderGatekeepers();
+    renderFechasTimeline();
+    renderRolesTimeline();
 
-        // Renderizar la interfaz con la nueva estructura
-        UI.renderGatekeepers();
-        UI.renderFechasTimeline();
-        UI.renderRolesTimeline();
-    } catch (error) {
-        console.error("Error al renderizar los datos iniciales:", error);
-    }
-});
-
-function initEventListeners() {
-    // Inicializar selectores visuales de roles y configuraciones admin
-    Admin.setupRoleSelectors();
-
-    // Pestañas principales
-    document.querySelectorAll("[data-tab]").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            const targetTab = e.currentTarget.getAttribute("data-tab");
-            UI.switchTab(targetTab);
-        });
+    // 3. Listeners de navegación por pestañas en cabecera
+    document.querySelectorAll(".nav-btn[data-tab]").forEach(btn => {
+        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
     });
 
-    // Filtros de Fechas
-    document.querySelectorAll("[data-filter-year]").forEach(link => {
-        link.addEventListener("click", (e) => {
+    // 4. Conectar botón flotante inferior de Cuenta estilo GD
+    document.getElementById("btn-gd-profile")?.addEventListener("click", () => {
+        switchTab("tab-cuenta");
+    });
+
+    // 5. Filtros de Fechas
+    document.querySelectorAll("[data-filter-year]").forEach(el => {
+        el.addEventListener("click", (e) => {
             e.preventDefault();
-            const year = e.currentTarget.getAttribute("data-filter-year");
-            UI.selectFechasFilter(year);
+            updateFilters({ year: el.dataset.filterYear });
+            switchTab("tab-fechas");
+            renderFechasTimeline();
         });
     });
 
-    // Orden de Fechas (Ascendente / Descendente)
     document.getElementById("select-dates-order")?.addEventListener("change", (e) => {
-        UI.setDatesOrder(e.target.value);
+        updateFilters({ order: e.target.value });
+        renderFechasTimeline();
     });
 
-    // Filtros de Roles
-    document.querySelectorAll("[data-filter-role]").forEach(link => {
-        link.addEventListener("click", (e) => {
+    document.getElementById("btn-toggle-fechas-mode")?.addEventListener("click", () => {
+        const nextState = (currentFilters.movementType + 1) % 3;
+        updateFilters({ movementType: nextState });
+
+        const lbl = document.getElementById("label-toggle-fechas");
+        if (lbl) {
+            if (nextState === 0) lbl.textContent = "Ver solo Ascensos";
+            else if (nextState === 1) lbl.textContent = "Ver solo Descensos";
+            else lbl.textContent = "Ver todos los registros";
+        }
+        renderFechasTimeline();
+    });
+
+    // 6. Filtros de Roles
+    document.querySelectorAll("[data-filter-role]").forEach(el => {
+        el.addEventListener("click", (e) => {
             e.preventDefault();
-            const role = e.currentTarget.getAttribute("data-filter-role");
-            UI.selectRolesFilter(role);
+            updateFilters({ role: el.dataset.filterRole });
+            switchTab("tab-roles");
+            renderRolesTimeline();
         });
     });
 
-    // Alternar vistas y modos
-    document.getElementById("btn-toggle-fechas-mode")?.addEventListener("click", UI.cycleFechasFilterMode);
-    document.getElementById("btn-toggle-old-badge")?.addEventListener("click", UI.toggleOldBadgeView);
+    document.getElementById("btn-toggle-old-badge")?.addEventListener("click", () => {
+        updateFilters({ useOldBadge: !currentFilters.useOldBadge });
+        const lbl = document.getElementById("lbl-old-badge-toggle");
+        if (lbl) {
+            lbl.textContent = currentFilters.useOldBadge ? "Ver con Insignia Actual" : "Ver con Insignia Antigua";
+        }
+        renderRolesTimeline();
+    });
 
-    // Buscador interactivo
-    document.getElementById("search-input")?.addEventListener("input", UI.executeSearch);
+    // 7. Buscador interactivo
+    document.getElementById("search-input")?.addEventListener("input", executeSearch);
 
-    // Ajustes visuales
-    document.getElementById("select-font-size")?.addEventListener("change", (e) => UI.changeFontSize(e.target.value));
-    document.getElementById("select-theme")?.addEventListener("change", (e) => UI.changeTheme(e.target.value));
-    document.getElementById("select-font-family")?.addEventListener("change", (e) => UI.changeFontFamily(e.target.value));
-
-    // Panel Administrador
-    document.getElementById("toggle-admin-switch")?.addEventListener("change", (e) => Admin.toggleAdminPanel(e.target.checked));
-    
-    // Acciones del Panel Administrador
-    document.getElementById("btn-admin-save-user")?.addEventListener("click", Admin.adminSaveUser);
-    document.getElementById("btn-admin-add-record")?.addEventListener("click", Admin.adminAddRegistroSeparated);
-}
+    // 8. Ajustes visuales
+    document.getElementById("select-font-size")?.addEventListener("change", (e) => {
+        document.documentElement.style.setProperty('--base-font-size', e.target.value);
+    });
+    document.getElementById("select-theme")?.addEventListener("change", (e) => {
+        document.body.className = e.target.value === 'light' ? 'theme-light' : 'theme-dark';
+    });
+});
