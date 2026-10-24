@@ -65,6 +65,7 @@ export async function initSpriteSheets() {
 }
 
 // Devuelve un <img> recortado listo para insertarse en el DOM
+// Reemplaza getSpriteImage en js/spriteSheet.js
 export function getSpriteImage(keyOrRole, targetSize = 24, cssClass = 'badge-img') {
     const imgEl = document.createElement('img');
     imgEl.className = cssClass;
@@ -76,7 +77,9 @@ export function getSpriteImage(keyOrRole, targetSize = 24, cssClass = 'badge-img
         return imgEl;
     }
 
-    const cacheKey = `${mapping.sheet}_${mapping.sprite}_${targetSize}`;
+    // DPR forzado al menos a 2 para garantizar super-muestreo nítido de texturas UHD
+    const dpr = Math.max(window.devicePixelRatio || 1, 2);
+    const cacheKey = `${mapping.sheet}_${mapping.sprite}_${targetSize}_x${dpr}`;
     if (cache.renderedIcons[cacheKey]) {
         imgEl.src = cache.renderedIcons[cacheKey];
         return imgEl;
@@ -90,18 +93,44 @@ export function getSpriteImage(keyOrRole, targetSize = 24, cssClass = 'badge-img
         return imgEl;
     }
 
+    // Lienzo interno en alta resolución física
     const canvas = document.createElement('canvas');
-    canvas.width = targetSize;
-    canvas.height = targetSize;
-    const ctx = canvas.getContext('2d');
+    canvas.width = Math.round(targetSize * dpr);
+    canvas.height = Math.round(targetSize * dpr);
 
-    const scale = targetSize / Math.max(frame.w, frame.h);
-    const dw = frame.w * scale;
-    const dh = frame.h * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    // Escalamos el contexto para dibujar nítidamente en la resolución interna
+    ctx.scale(dpr, dpr);
+
+    const origW = frame.rotated ? frame.h : frame.w;
+    const origH = frame.rotated ? frame.w : frame.h;
+
+    const scale = targetSize / Math.max(origW, origH);
+    const dw = origW * scale;
+    const dh = origH * scale;
     const dx = (targetSize - dw) / 2;
     const dy = (targetSize - dh) / 2;
 
-    ctx.drawImage(sourceImage, frame.x, frame.y, frame.w, frame.h, dx, dy, dw, dh);
+    ctx.save();
+    if (frame.rotated) {
+        ctx.translate(targetSize / 2, targetSize / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.drawImage(
+            sourceImage,
+            frame.x, frame.y, frame.h, frame.w,
+            -dh / 2, -dw / 2, dh, dw
+        );
+    } else {
+        ctx.drawImage(
+            sourceImage,
+            frame.x, frame.y, frame.w, frame.h,
+            dx, dy, dw, dh
+        );
+    }
+    ctx.restore();
 
     const dataUrl = canvas.toDataURL('image/png');
     cache.renderedIcons[cacheKey] = dataUrl;
