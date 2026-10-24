@@ -33,6 +33,7 @@ export const SPRITE_MAPPINGS = {
     "nav_buscador": { sheet: "sheet04", sprite: "GJ_searchIcon_001.png" },
     "nav_otros": { sheet: "particles", sprite: "particle_336_001.png" },
     "nav_ajustes": { sheet: "sheet04", sprite: "GJ_sSettingsIcon_001.png" },
+    "nav_cuenta": { sheet: "sheet03", sprite: "GJ_profileButton_001.png" },
 
     // Acciones y Admin
     "action_delete": { sheet: "sheet03", sprite: "GJ_trashBtn_001.png" },
