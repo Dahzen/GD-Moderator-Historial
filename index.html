@@ -68,7 +68,13 @@
         </div>
     </header>
 
-    <!-- BOTÓN FLOTANTE LATERAL PARA PANEL ADMIN -->
+    <!-- BOTÓN FLOTANTE ESTILO GD: CUENTA / PERFIL (INFERIOR IZQUIERDA) -->
+    <button id="btn-gd-profile" class="gd-profile-btn" data-tab="tab-cuenta" title="Cuenta / Perfil">
+        <span id="gd-profile-icon-slot"></span>
+        <span class="gd-profile-label">Cuenta</span>
+    </button>
+
+    <!-- BOTÓN FLOTANTE LATERAL PARA PANEL ADMIN (INFERIOR DERECHA) -->
     <button id="btn-side-admin-toggle" class="side-admin-btn" title="Abrir Panel de Administración"></button>
 
     <!-- PANEL ADMIN LATERAL (DRAWER / OVERLAY) -->
@@ -79,7 +85,6 @@
         </div>
 
         <div class="admin-sidebar-content">
-            <!-- GESTOR DE TEXTOS -->
             <div class="admin-section">
                 <h3>Gestor de Textos e Información</h3>
                 <select id="admin-info-target" style="width:100%; margin-bottom:12px;">
@@ -102,7 +107,6 @@
                 </div>
             </div>
 
-            <!-- GESTIÓN DE USUARIOS -->
             <div class="admin-section">
                 <h3>Gestión de Usuarios</h3>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
@@ -127,7 +131,6 @@
                 <button class="btn-action" id="btn-admin-save-user">Guardar / Crear Usuario</button>
             </div>
 
-            <!-- GESTIÓN DE REGISTROS HISTÓRICOS -->
             <div class="admin-section">
                 <h3>Agregar Registro Histórico</h3>
                 <input type="text" id="add-record-userid" placeholder="ID de Usuario" style="margin-bottom:8px; width:100%;">
@@ -275,9 +278,53 @@
                 </div>
             </article>
         </section>
+
+        <!-- PESTAÑA: CUENTA / PERFIL -->
+        <section id="tab-cuenta" class="tab-pane">
+            <!-- Formulario de Login -->
+            <article id="account-login-view" class="content-card" style="max-width: 460px; margin: 1rem auto;">
+                <h2>Acceso de Cuenta</h2>
+                <p style="margin-bottom: 1.2rem;">Inicia sesión para gestionar el historial o acceder a funciones de tu rol.</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">Nombre de Usuario:</label>
+                        <input type="text" id="input-login-user" placeholder="admin o guest" style="margin-top: 4px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-muted);">Contraseña:</label>
+                        <input type="password" id="input-login-pass" placeholder="Ingresa contraseña..." style="margin-top: 4px;">
+                    </div>
+                    <button class="btn-action" id="btn-submit-login" style="margin-top: 6px;">Iniciar Sesión</button>
+                </div>
+                <div style="margin-top: 16px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+                    Cuentas de prueba: <strong>admin</strong> (pass: <code>gd123admin</code>) | <strong>guest</strong> (sin contraseña)
+                </div>
+            </article>
+
+            <!-- Vista de Perfil Activo -->
+            <article id="account-profile-view" class="content-card hidden" style="max-width: 520px; margin: 1rem auto;">
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 1.2rem;">
+                    <div id="profile-avatar-slot"></div>
+                    <div>
+                        <h2 id="profile-display-name" style="margin: 0; font-size: 1.35rem;">Usuario</h2>
+                        <span id="profile-display-role" style="font-size: 0.8rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: rgba(255,255,255,0.08);">ROL</span>
+                    </div>
+                </div>
+
+                <div style="background: var(--bg-panel); border: 1px solid var(--border-subtle); padding: 14px; border-radius: var(--radius-item); margin-bottom: 1.4rem;">
+                    <p style="margin: 0; font-size: 0.9rem;" id="profile-status-desc"></p>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-action btn-secondary" id="btn-profile-admin-panel" style="display: none;">Abrir Panel Admin</button>
+                    <button class="btn-action btn-danger" id="btn-profile-logout">Cerrar Sesión</button>
+                </div>
+            </article>
+        </section>
     </main>
 
-    <!-- MODAL CUSTOM ELIMINAR -->
+    <!-- MODALES DE EDICIÓN Y BORRADO -->
     <div id="modal-delete" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 id="modal-delete-title">¿Confirmar Eliminación?</h3>
@@ -289,7 +336,6 @@
         </div>
     </div>
 
-    <!-- MODAL CUSTOM EDITAR USUARIO -->
     <div id="modal-edit-user" class="modal-overlay hidden">
         <div class="modal-content">
             <h3>Editar Usuario</h3>
@@ -312,7 +358,6 @@
         </div>
     </div>
 
-    <!-- MODAL CUSTOM EDITAR REGISTRO -->
     <div id="modal-edit" class="modal-overlay hidden">
         <div class="modal-content">
             <h3>Editar Registro Histórico</h3>
@@ -349,6 +394,7 @@
         </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <!-- CARGA MODULAR V1.7 -->
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
