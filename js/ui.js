@@ -31,7 +31,6 @@ const COUNTRY_CODES = {
 export function getFlagElement(country) {
     const code = COUNTRY_CODES[country] || COUNTRY_CODES[country?.trim()];
     if (code) {
-        // Pedimos w80 (alta resolución) y le damos estilo con renderizado suave
         return `<img src="https://flagcdn.com/w80/${code}.png" class="flag-hd" alt="${country}" title="${country}">`;
     }
     return '';
@@ -42,41 +41,8 @@ export function getBadgeHTML(role, useOld = false) {
     if (role === "Rating Advisor" && useOld) {
         key = "badge_old";
     }
-    const sprite = getSpriteImage(key, 32, "badge-img");
-    return sprite.outerHTML;
-}
-
-export function setupNavbarIcons() {
-    const navItems = [
-        { id: "btn-gatekeepers", key: "nav_gatekeepers" },
-        { id: "btn-fechas", key: "nav_fechas" },
-        { id: "btn-roles", key: "nav_roles" },
-        { id: "btn-nacionalidad", key: "nav_nacionalidad" },
-        { id: "btn-buscador", key: "nav_buscador" },
-        { id: "btn-otros", key: "nav_otros" },
-        { id: "btn-ajustes", key: "nav_ajustes" }
-    ];
-
-    navItems.forEach(item => {
-        const btn = document.getElementById(item.id);
-        if (!btn) return;
-
-        const sprite = getSpriteImage(item.key, 26, "icon-small");
-        const existing = btn.querySelector("img, canvas");
-        if (existing) {
-            existing.replaceWith(sprite);
-        } else {
-            btn.prepend(sprite);
-        }
-    });
-
-    const profileSlot = document.getElementById("gd-profile-icon-slot");
-    if (profileSlot) {
-        profileSlot.innerHTML = "";
-        profileSlot.appendChild(getSpriteImage("nav_cuenta", 50, "badge-img"));
-    }
-
-    applySessionUI();
+    const sprite = getSpriteImage(key, 40, "badge-img");
+    return sprite ? sprite.outerHTML : '';
 }
 
 export function applySessionUI() {
@@ -86,12 +52,120 @@ export function applySessionUI() {
         adminToggle.style.display = isAdmin ? "flex" : "none";
         if (isAdmin) {
             adminToggle.innerHTML = "";
-            adminToggle.appendChild(getSpriteImage("admin_gear", 28, "icon-small"));
+            const optionsSprite = getSpriteImage("GJ_optionsBtn02_001", 54, "admin-gear-img");
+            if (optionsSprite) {
+                adminToggle.appendChild(optionsSprite);
+            } else {
+                const img = document.createElement("img");
+                img.src = "assets/GJ_optionsBtn02_001.png";
+                img.alt = "Admin Options";
+                img.className = "admin-gear-img";
+                adminToggle.appendChild(img);
+            }
+        }
+    }
+
+    const closeBtn = document.getElementById("btn-close-admin-sidebar");
+    if (closeBtn && !closeBtn.querySelector("img, canvas")) {
+        const closeSprite = getSpriteImage("GJ_deleteSongBtn_001", 34, "icon-close") 
+                         || getSpriteImage("GJ_closeBtn_001", 34, "icon-close")
+                         || getSpriteImage("btn_delete", 34, "icon-close");
+        if (closeSprite) {
+            closeBtn.innerHTML = "";
+            closeBtn.appendChild(closeSprite);
+        } else {
+            closeBtn.innerHTML = '<span class="fallback-close-gd">&times;</span>';
         }
     }
 }
 
+export function setupNavbarIcons() {
+    try {
+        const navItems = [
+            { id: "btn-gatekeepers", key: "nav_gatekeepers" },
+            { id: "btn-fechas", key: "nav_fechas" },
+            { id: "btn-roles", key: "nav_roles" },
+            { id: "btn-nacionalidad", key: "nav_nacionalidad" },
+            { id: "btn-buscador", key: "nav_buscador" },
+            { id: "btn-otros", key: "nav_otros" },
+            { id: "btn-ajustes", key: "nav_ajustes" }
+        ];
+
+        navItems.forEach(item => {
+            const btn = document.getElementById(item.id);
+            if (!btn) return;
+
+            const sprite = getSpriteImage(item.key, 26, "icon-small");
+            if (sprite) {
+                const existing = btn.querySelector("img.icon-small, canvas.icon-small");
+                if (existing) {
+                    existing.replaceWith(sprite);
+                } else {
+                    btn.prepend(sprite);
+                }
+            }
+        });
+
+        const btnRoles = document.getElementById('btn-roles');
+        const rolesDropdown = btnRoles ? btnRoles.closest('.dropdown') : null;
+
+        if (rolesDropdown) {
+            const roleLinks = rolesDropdown.querySelectorAll('.dropdown-content a');
+            roleLinks.forEach(link => {
+                const role = link.getAttribute('data-filter-role');
+                let sprite = null;
+
+                if (role === 'all') {
+                    sprite = getSpriteImage('nav_nacionalidad', 20, 'icon-small');
+                } else if (role) {
+                    sprite = getSpriteImage(role, 20, 'badge-img');
+                }
+
+                if (sprite) {
+                    const existingIcon = link.querySelector('img, canvas');
+                    if (existingIcon) {
+                        existingIcon.replaceWith(sprite);
+                    } else {
+                        link.prepend(sprite);
+                    }
+                }
+            });
+
+            btnRoles.addEventListener('click', () => {
+                rolesDropdown.classList.toggle('open');
+            });
+
+            roleLinks.forEach(item => {
+                item.addEventListener('click', () => {
+                    rolesDropdown.classList.remove('open');
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!rolesDropdown.contains(e.target)) {
+                    rolesDropdown.classList.remove('open');
+                }
+            });
+        }
+
+        const profileSlot = document.getElementById("gd-profile-icon-slot");
+        if (profileSlot) {
+            profileSlot.innerHTML = "";
+            const profileIcon = getSpriteImage("nav_cuenta", 50, "badge-img");
+            if (profileIcon) {
+                profileSlot.appendChild(profileIcon);
+            }
+        }
+
+        applySessionUI();
+    } catch (err) {
+        console.error("Error al configurar la barra superior:", err);
+    }
+}
+
 export function switchTab(tabId) {
+    if (!tabId) return;
+
     document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
     document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
 
@@ -126,7 +200,6 @@ export function switchTab(tabId) {
     }
 }
 
-// Renderiza el Grid Modular de Gatekeepers con acordeón desplegable
 export function renderGatekeepers() {
     const mList = document.getElementById("gk-list-moderators");
     const aList = document.getElementById("gk-list-advisors");
@@ -139,74 +212,41 @@ export function renderGatekeepers() {
 
     const isAdmin = currentUserSession.role === "admin";
 
+    const editSprite = getSpriteImage("GJ_viewLevelsBtn_001", 48, "icon-small")?.outerHTML 
+                    || getSpriteImage("btn_edit", 48, "icon-small")?.outerHTML 
+                    || '✎';
+
+    const delSprite = getSpriteImage("GJ_resetBtn_001", 48, "icon-small")?.outerHTML 
+                   || getSpriteImage("btn_delete", 48, "icon-small")?.outerHTML 
+                   || '✕';
+
     moderatorsList.forEach(mod => {
         const card = document.createElement("div");
         card.className = "gk-item";
-        card.style.flexDirection = "column";
-        card.style.alignItems = "stretch";
 
         let adminControls = '';
         if (isAdmin) {
             adminControls = `
-                <div style="display:flex; gap:6px; margin-left:auto;">
-                    <button class="btn-card-action btn-edit-user" data-id="${mod.id}" title="Editar Moderador" style="width:26px; height:26px;">✎</button>
-                    <button class="btn-card-action btn-delete-user" data-id="${mod.id}" data-name="${mod.name}" title="Eliminar Moderador" style="width:26px; height:26px; color:var(--accent-red);">✕</button>
+                <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
+                    <button class="btn-card-action btn-edit-user" data-id="${mod.id}" title="Editar Moderador">
+                        ${editSprite}
+                    </button>
+                    <button class="btn-card-action btn-delete-user" data-id="${mod.id}" data-name="${mod.name}" title="Eliminar Moderador">
+                        ${delSprite}
+                    </button>
                 </div>
             `;
         }
 
-        const eventsCount = mod.history ? mod.history.length : 0;
-        const aliasesText = mod.aliases && mod.aliases.length ? `<div style="font-size:0.75rem; color:var(--text-muted);">Alias: ${mod.aliases.join(", ")}</div>` : '';
-
-        // Encabezado de la tarjeta
-        const headerHtml = `
-            <div style="display:flex; align-items:center; gap:12px; width:100%;">
-                ${getBadgeHTML(mod.currentRole)}
-                <div style="flex:1;">
-                    <strong style="color:var(--text-pure); font-size:1rem;">${mod.name}</strong> ${getFlagElement(mod.country)}
-                    <div style="font-size:0.8rem; color:var(--text-muted);">ID: ${mod.id} · ${mod.country}</div>
-                    ${aliasesText}
-                </div>
-                ${adminControls}
+        card.innerHTML = `
+            ${getBadgeHTML(mod.currentRole)}
+            <div style="flex:1;">
+                <div style="font-family: var(--font-gd); color: var(--text-pure); font-size: 1.15rem; letter-spacing: 0.8px; line-height: 1.2;">${mod.name}</div>
+                <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">ID: ${mod.id}</div>
             </div>
+            ${adminControls}
         `;
 
-        // Acordeón de Historial
-        let historyListHtml = '<div style="font-size:0.8rem; color:var(--text-muted); padding:6px 0;">Sin registros históricos.</div>';
-        if (eventsCount > 0) {
-            historyListHtml = mod.history.map(ev => `
-                <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.8rem; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
-                    <span>${ev.dateStr}</span>
-                    <span style="color:${ev.type === 'promote' ? 'var(--accent-green)' : 'var(--accent-red)'}; font-weight:600;">
-                        ${ev.type === 'promote' ? '↑' : '↓'} ${ev.role}
-                    </span>
-                </div>
-            `).join('');
-        }
-
-        const toggleBtnHtml = `
-            <button class="btn-toggle-mod-history" style="background:transparent; border:none; color:var(--text-link); font-size:0.78rem; cursor:pointer; text-align:left; padding:6px 0 0; margin-top:6px; border-top:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center;">
-                <span>Historial de promociones (${eventsCount})</span>
-                <span class="history-arrow">▼</span>
-            </button>
-            <div class="mod-history-drawer hidden" style="margin-top:8px; padding-top:4px;">
-                ${historyListHtml}
-            </div>
-        `;
-
-        card.innerHTML = headerHtml + toggleBtnHtml;
-
-        // Toggle del acordeón
-        const toggleBtn = card.querySelector('.btn-toggle-mod-history');
-        const historyDrawer = card.querySelector('.mod-history-drawer');
-        const arrow = card.querySelector('.history-arrow');
-
-        toggleBtn?.addEventListener('click', () => {
-            const isHidden = historyDrawer.classList.toggle('hidden');
-            arrow.textContent = isHidden ? '▼' : '▲';
-        });
-
-        // Eventos Admin
         if (isAdmin) {
             card.querySelector('.btn-edit-user')?.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -227,77 +267,167 @@ export function renderGatekeepers() {
 export function renderFechasTimeline() {
     const container = document.getElementById("fechas-timeline-container");
     if (!container) return;
-    container.innerHTML = "";
 
-    const isAdmin = currentUserSession.role === "admin";
-
-    let events = getFlattenedEvents().filter(ev => {
-        if (currentFilters.year !== "all" && String(ev.year) !== String(currentFilters.year)) return false;
-        if (currentFilters.movementType === 1 && ev.type !== "promote") return false;
-        if (currentFilters.movementType === 2 && ev.type !== "demote") return false;
-        return true;
+    const allEvents = getFlattenedEvents();
+    const yearsAvailable = ["all", ...new Set(allEvents.map(e => e.year))].sort((a, b) => {
+        if (a === "all") return -1;
+        if (b === "all") return 1;
+        return Number(b) - Number(a);
     });
 
-    if (events.length === 0) {
-        container.innerHTML = "<div class='content-card'><p>No hay registros para este filtro.</p></div>";
-        return;
+    const typeLabels = { 0: 'TODOS', 1: 'ASCENSOS', 2: 'DESCENSOS' };
+
+    let controlsBar = document.getElementById("timeline-controls-bar");
+    if (!controlsBar) {
+        controlsBar = document.createElement("div");
+        controlsBar.id = "timeline-controls-bar";
+        controlsBar.className = "timeline-controls-bar";
+
+        const isYearActive = currentFilters.year !== "all";
+        const isTypeActive = currentFilters.movementType !== 0;
+
+        const filterIconElement = getSpriteImage("GJ_filterIcon_001", 24, "icon-filter-order") 
+                               || getSpriteImage("GJ_sortIcon_001", 24, "icon-filter-order");
+
+        controlsBar.innerHTML = `
+            <div class="controls-group">
+                <label>AÑO:</label>
+                <select id="fecha-filter-year" class="gd-control-btn ${isYearActive ? 'is-active' : ''}">
+                    ${yearsAvailable.map(yr => `
+                        <option value="${yr}" ${currentFilters.year == yr ? 'selected' : ''}>
+                            ${yr === 'all' ? 'TODOS' : yr}
+                        </option>
+                    `).join('')}
+                </select>
+            </div>
+
+            <div class="controls-group">
+                <label>TIPO:</label>
+                <button id="fecha-single-type-btn" class="gd-control-btn btn-type-fixed ${isTypeActive ? 'is-active' : ''}">
+                    ${typeLabels[currentFilters.movementType || 0]}
+                </button>
+            </div>
+
+            <div class="controls-group">
+                <label>ORDEN:</label>
+                <button id="fecha-toggle-order" class="btn-gd-icon-square" title="Alternar orden">
+                </button>
+                <span id="fecha-order-label" class="order-status-text">
+                    ${currentFilters.order === 'desc' ? 'RECIENTES' : 'ANTIGUOS'}
+                </span>
+            </div>
+        `;
+
+        if (filterIconElement) {
+            controlsBar.querySelector('#fecha-toggle-order').appendChild(filterIconElement);
+        }
+
+        const selectYearEl = controlsBar.querySelector('#fecha-filter-year');
+        const btnTypeEl = controlsBar.querySelector('#fecha-single-type-btn');
+
+        selectYearEl.addEventListener('change', (e) => {
+            updateFilters({ year: e.target.value });
+            selectYearEl.classList.toggle('is-active', e.target.value !== 'all');
+            updateEventsList();
+        });
+
+        btnTypeEl.addEventListener('click', () => {
+            const nextType = ((currentFilters.movementType || 0) + 1) % 3;
+            updateFilters({ movementType: nextType });
+            btnTypeEl.textContent = typeLabels[nextType];
+            btnTypeEl.classList.toggle('is-active', nextType !== 0);
+            updateEventsList();
+        });
+
+        controlsBar.querySelector('#fecha-toggle-order').addEventListener('click', () => {
+            const newOrder = currentFilters.order === 'desc' ? 'asc' : 'desc';
+            updateFilters({ order: newOrder });
+            const labelEl = document.getElementById("fecha-order-label");
+            if (labelEl) labelEl.textContent = newOrder === 'desc' ? 'RECIENTES' : 'ANTIGUOS';
+            updateEventsList();
+        });
+
+        container.parentNode.insertBefore(controlsBar, container);
     }
 
-    const grouped = {};
-    events.forEach(ev => {
-        if (!grouped[ev.year]) grouped[ev.year] = {};
-        if (!grouped[ev.year][ev.month]) grouped[ev.year][ev.month] = [];
-        grouped[ev.year][ev.month].push(ev);
-    });
+    function updateEventsList() {
+        container.innerHTML = "";
 
-    const years = Object.keys(grouped).sort((a, b) => 
-        currentFilters.order === "desc" ? Number(b) - Number(a) : Number(a) - Number(b)
-    );
+        const isAdmin = currentUserSession.role === "admin";
+        const delSprite = getSpriteImage("GJ_resetBtn_001", 26, "icon-small")?.outerHTML 
+                       || getSpriteImage("btn_delete", 26, "icon-small")?.outerHTML 
+                       || '✕';
 
-    years.forEach(yr => {
-        const yearBlock = document.createElement("div");
-        yearBlock.className = "year-block";
-        yearBlock.innerHTML = `<h2 class="year-title">Año ${yr}</h2>`;
-
-        Object.keys(grouped[yr]).forEach(mth => {
-            const monthBlock = document.createElement("div");
-            monthBlock.className = "month-block";
-            monthBlock.innerHTML = `<h3 class="month-title">${mth}</h3>`;
-
-            grouped[yr][mth].forEach(rec => {
-                const item = document.createElement("div");
-                item.className = `record-item ${rec.type === 'promote' ? 'record-promote' : 'record-demote'}`;
-
-                let adminBtn = '';
-                if (isAdmin) {
-                    adminBtn = `<button class="btn-card-action btn-del-event" data-event-id="${rec.eventId}" style="margin-left:auto; width:26px; height:26px; color:var(--accent-red);" title="Eliminar Registro">✕</button>`;
-                }
-
-                item.innerHTML = `
-                    ${getBadgeHTML(rec.role)}
-                    <div style="flex:1;">
-                        <strong>Día ${rec.day}</strong> - <strong>${rec.modName}</strong> (ID: ${rec.modId}) ${getFlagElement(rec.country)}
-                        - <span style="color:${rec.type === 'promote' ? 'var(--accent-green)' : 'var(--accent-red)'}">
-                            ${rec.type === 'promote' ? 'ASCENSO' : 'DESCENSO'}
-                          </span>
-                        [${rec.role}]
-                    </div>
-                    ${adminBtn}
-                `;
-
-                if (isAdmin) {
-                    item.querySelector('.btn-del-event')?.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        openDeleteModal(rec.eventId, 'event');
-                    });
-                }
-
-                monthBlock.appendChild(item);
-            });
-            yearBlock.appendChild(monthBlock);
+        let events = allEvents.filter(ev => {
+            if (currentFilters.year !== "all" && String(ev.year) !== String(currentFilters.year)) return false;
+            if (currentFilters.movementType === 1 && ev.type !== "promote") return false;
+            if (currentFilters.movementType === 2 && ev.type !== "demote") return false;
+            return true;
         });
-        container.appendChild(yearBlock);
-    });
+
+        if (events.length === 0) {
+            container.innerHTML = "<div class='content-card'><p>No hay registros para este filtro.</p></div>";
+            return;
+        }
+
+        const grouped = {};
+        events.forEach(ev => {
+            if (!grouped[ev.year]) grouped[ev.year] = {};
+            if (!grouped[ev.year][ev.month]) grouped[ev.year][ev.month] = [];
+            grouped[ev.year][ev.month].push(ev);
+        });
+
+        const years = Object.keys(grouped).sort((a, b) => 
+            currentFilters.order === "desc" ? Number(b) - Number(a) : Number(a) - Number(b)
+        );
+
+        years.forEach(yr => {
+            const yearBlock = document.createElement("div");
+            yearBlock.className = "year-block";
+            yearBlock.innerHTML = `<h2 class="year-title">Año ${yr}</h2>`;
+
+            Object.keys(grouped[yr]).forEach(mth => {
+                const monthBlock = document.createElement("div");
+                monthBlock.className = "month-block";
+                monthBlock.innerHTML = `<h3 class="month-title">${mth}</h3>`;
+
+                grouped[yr][mth].forEach(rec => {
+                    const item = document.createElement("div");
+                    item.className = `record-item ${rec.type === 'promote' ? 'record-promote' : 'record-demote'}`;
+
+                    let adminBtn = '';
+                    if (isAdmin) {
+                        adminBtn = `<button class="btn-card-action btn-del-event" data-event-id="${rec.eventId}" style="margin-left:auto;" title="Eliminar Registro">${delSprite}</button>`;
+                    }
+
+                    item.innerHTML = `
+                        ${getBadgeHTML(rec.role)}
+                        <div style="flex:1;">
+                            <strong>Día ${rec.day}</strong> - <strong>${rec.modName}</strong> (ID: ${rec.modId})
+                            - <span style="color:${rec.type === 'promote' ? 'var(--accent-green)' : 'var(--accent-red)'}">
+                                ${rec.type === 'promote' ? 'ASCENSO' : 'DESCENSO'}
+                            </span>
+                            [${rec.role}]
+                        </div>
+                        ${adminBtn}
+                    `;
+
+                    if (isAdmin) {
+                        item.querySelector('.btn-del-event')?.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openDeleteModal(rec.eventId, 'event');
+                        });
+                    }
+
+                    monthBlock.appendChild(item);
+                });
+                yearBlock.appendChild(monthBlock);
+            });
+            container.appendChild(yearBlock);
+        });
+    }
+
+    updateEventsList();
 }
 
 export function renderRolesTimeline() {
@@ -327,7 +457,7 @@ export function renderRolesTimeline() {
         card.innerHTML = `
             ${getBadgeHTML(rec.role, currentFilters.useOldBadge && rec.role === "Rating Advisor")}
             <div>
-                <strong>${rec.dateStr}</strong> - <strong>${rec.modName}</strong> (ID: ${rec.modId}) ${getFlagElement(rec.country)}
+                <strong>${rec.dateStr}</strong> - <strong>${rec.modName}</strong> (ID: ${rec.modId})
                 - Rol: <strong>${rec.role}</strong> (${rec.type === 'promote' ? 'Ascenso' : 'Descenso'})
             </div>
         `;
@@ -338,13 +468,46 @@ export function renderRolesTimeline() {
 export function renderNacionalidades() {
     const grid = document.getElementById("country-grid");
     if (!grid) return;
-    grid.innerHTML = "";
 
-    const countries = [...new Set(moderatorsList.map(m => m.country).filter(Boolean))];
+    const allEvents = getFlattenedEvents();
+    const countryCounts = {};
+
+    allEvents.forEach(ev => {
+        if (ev.country) {
+            countryCounts[ev.country] = (countryCounts[ev.country] || 0) + 1;
+        }
+    });
+
+    const countries = Object.keys(countryCounts).sort((a, b) => a.localeCompare(b));
+
+    let searchInput = document.getElementById("country-search-input");
+    if (!searchInput) {
+        const searchWrapper = document.createElement("div");
+        searchWrapper.className = "country-search-bar";
+        searchWrapper.innerHTML = `
+            <input type="text" id="country-search-input" placeholder="Buscar país..." autocomplete="off">
+        `;
+        grid.parentNode.insertBefore(searchWrapper, grid);
+        searchInput = document.getElementById("country-search-input");
+
+        searchInput.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            document.querySelectorAll(".country-btn").forEach(btn => {
+                const name = btn.getAttribute("data-country-name").toLowerCase();
+                btn.style.display = name.includes(query) ? "inline-flex" : "none";
+            });
+        });
+    }
+
+    grid.innerHTML = "";
     countries.forEach(c => {
         const btn = document.createElement("button");
         btn.className = "country-btn";
-        btn.innerHTML = `${c} ${getFlagElement(c)}`;
+        btn.setAttribute("data-country-name", c);
+        btn.innerHTML = `
+            <span>${c} ${getFlagElement(c)}</span>
+            <span class="country-count-tag">${countryCounts[c]}</span>
+        `;
         btn.onclick = () => showCountryRecords(c);
         grid.appendChild(btn);
     });
@@ -353,15 +516,27 @@ export function renderNacionalidades() {
 export function showCountryRecords(country) {
     const container = document.getElementById("country-timeline-container");
     if (!container) return;
-    container.innerHTML = `<h3 style="color:var(--accent-primary); margin-bottom: 12px;">Registros de: ${country} ${getFlagElement(country)}</h3>`;
 
-    getFlattenedEvents().filter(ev => ev.country === country).forEach(rec => {
+    const countryEvents = getFlattenedEvents().filter(ev => ev.country === country);
+
+    container.innerHTML = `
+        <h3 style="color:var(--accent-primary); margin-bottom: 14px; font-family:var(--font-gd); font-size:1.05rem;">
+            Registros de: ${country} ${getFlagElement(country)} (${countryEvents.length})
+        </h3>
+    `;
+
+    countryEvents.forEach(rec => {
+        const isPromote = rec.type === 'promote';
         const card = document.createElement("div");
-        card.className = "record-item";
+        card.className = `record-item ${isPromote ? 'record-promote' : 'record-demote'}`;
         card.innerHTML = `
             ${getBadgeHTML(rec.role)}
             <div>
-                <strong>${rec.dateStr}</strong> - <strong>${rec.modName}</strong> (${rec.type}) - Rol: ${rec.role}
+                <strong>${rec.dateStr}</strong> - <strong>${rec.modName}</strong> 
+                - <span style="color:${isPromote ? 'var(--accent-green)' : 'var(--accent-red)'}">
+                    ${isPromote ? 'ASCENSO' : 'DESCENSO'}
+                </span> 
+                - Rol: <strong>${rec.role}</strong>
             </div>
         `;
         container.appendChild(card);
@@ -379,6 +554,11 @@ export function executeSearch() {
         return;
     }
 
+    const isAdmin = currentUserSession.role === "admin";
+    const delSprite = getSpriteImage("GJ_resetBtn_001", 26, "icon-small")?.outerHTML 
+                || getSpriteImage("btn_delete", 26, "icon-small")?.outerHTML 
+                || '✕';
+
     const results = getFlattenedEvents().filter(ev => 
         ev.modName.toLowerCase().includes(q) ||
         String(ev.modId).includes(q) ||
@@ -393,15 +573,37 @@ export function executeSearch() {
     container.innerHTML = "";
     results.forEach(rec => {
         const card = document.createElement("div");
-        card.className = "record-item";
+        const isPromote = rec.type === 'promote';
+        card.className = `record-item ${isPromote ? 'record-promote' : 'record-demote'}`;
+
+        let adminBtn = '';
+        if (isAdmin && rec.eventId) {
+            adminBtn = `<button class="btn-card-action btn-del-event" data-event-id="${rec.eventId}" style="margin-left:auto;" title="Eliminar Registro">${delSprite}</button>`;
+        }
+
         card.innerHTML = `
             ${getBadgeHTML(rec.role)}
-            <div>
-                <strong>${rec.modName}</strong> (ID: ${rec.modId}) ${getFlagElement(rec.country)}
-                ${rec.aliases.length ? `<br><small style='color:var(--text-muted)'>Alias: ${rec.aliases.join(", ")}</small>` : ""}
-                <br><span>Fecha: ${rec.dateStr} | Estado: ${rec.type} [${rec.role}]</span>
+            <div style="flex:1;">
+                <strong style="color:var(--text-pure); font-size:0.95rem;">${rec.modName}</strong> (ID: ${rec.modId})
+                ${rec.aliases && rec.aliases.length ? `<br><small style='color:var(--text-muted)'>Alias: ${rec.aliases.join(", ")}</small>` : ""}
+                <div style="font-size:0.82rem; margin-top:2px;">
+                    <span>Fecha: ${rec.dateStr}</span> · 
+                    <span style="color:${isPromote ? 'var(--accent-green)' : 'var(--accent-red)'}; font-weight:600;">
+                        ${isPromote ? 'ASCENSO' : 'DESCENSO'}
+                    </span> 
+                    [${rec.role}]
+                </div>
             </div>
+            ${adminBtn}
         `;
+
+        if (isAdmin && rec.eventId) {
+            card.querySelector('.btn-del-event')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openDeleteModal(rec.eventId, 'event');
+            });
+        }
+
         container.appendChild(card);
     });
 }
