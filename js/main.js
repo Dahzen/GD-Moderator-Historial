@@ -12,8 +12,12 @@ import {
 } from './ui.js';
 import { setupAdminAuth } from './admin.js';
 import { currentFilters, updateFilters } from './state.js';
+import { particleEngine } from './particles.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
+    // 0. Iniciar motor de partículas de fondo GD
+    particleEngine.init();
+
     // 1. Cargar hojas de sprites y storage
     await initSpriteSheets();
     await initStorage();
@@ -25,9 +29,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderFechasTimeline();
     renderRolesTimeline();
 
-    // 3. Listeners de navegación por pestañas en cabecera
+    // 3. Listeners de navegación por pestañas en cabecera (Delegación segura contra clics en iconos/textos)
     document.querySelectorAll(".nav-btn[data-tab]").forEach(btn => {
-        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+        btn.addEventListener("click", (e) => {
+            const targetBtn = e.target.closest(".nav-btn[data-tab]");
+            if (targetBtn && targetBtn.dataset.tab) {
+                switchTab(targetBtn.dataset.tab);
+            }
+        });
     });
 
     // 4. Conectar botón flotante inferior de Cuenta estilo GD
@@ -89,7 +98,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("select-font-size")?.addEventListener("change", (e) => {
         document.documentElement.style.setProperty('--base-font-size', e.target.value);
     });
-    document.getElementById("select-theme")?.addEventListener("change", (e) => {
-        document.body.className = e.target.value === 'light' ? 'theme-light' : 'theme-dark';
-    });
+
+    const selectTheme = document.getElementById("select-theme");
+    if (selectTheme) {
+        selectTheme.value = document.body.classList.contains("theme-light") ? "light" : "dark";
+        selectTheme.addEventListener("change", (e) => {
+            document.body.className = e.target.value === 'light' ? 'theme-light' : 'theme-dark';
+        });
+    }
+
+    // Control del interruptor de partículas
+    const toggleParticles = document.getElementById("toggle-particles");
+    if (toggleParticles) {
+        const savedPref = localStorage.getItem('gd_particles_enabled');
+        if (savedPref !== null) {
+            toggleParticles.checked = savedPref === 'true';
+        }
+        toggleParticles.addEventListener("change", (e) => {
+            particleEngine.toggle(e.target.checked);
+        });
+    }
 });
