@@ -15,23 +15,9 @@
                 <span>Gatekeepers</span>
             </button>
 
-            <div class="dropdown">
-                <button class="nav-btn" id="btn-fechas" data-tab="tab-fechas">
-                    <span>Fechas</span>
-                </button>
-                <div class="dropdown-content">
-                    <a href="#" data-filter-year="all">All</a>
-                    <a href="#" data-filter-year="2018">2018</a>
-                    <a href="#" data-filter-year="2019">2019</a>
-                    <a href="#" data-filter-year="2020">2020</a>
-                    <a href="#" data-filter-year="2021">2021</a>
-                    <a href="#" data-filter-year="2022">2022</a>
-                    <a href="#" data-filter-year="2023">2023</a>
-                    <a href="#" data-filter-year="2024">2024</a>
-                    <a href="#" data-filter-year="2025">2025</a>
-                    <a href="#" data-filter-year="2026">2026</a>
-                </div>
-            </div>
+            <button class="nav-btn" id="btn-fechas" data-tab="tab-fechas">
+                <span>Fechas</span>
+            </button>
 
             <div class="dropdown">
                 <button class="nav-btn" id="btn-roles" data-tab="tab-roles">
@@ -68,22 +54,22 @@
         </div>
     </header>
 
-    <!-- BOTÓN FLOTANTE ESTILO GD: CUENTA / PERFIL (INFERIOR IZQUIERDA) -->
+    <!-- BOTÓN FLOTANTE ESTILO GD: CUENTA / PERFIL -->
     <button id="btn-gd-profile" class="gd-profile-btn" data-tab="tab-cuenta" title="Cuenta / Perfil">
         <span id="gd-profile-icon-slot"></span>
         <span class="gd-profile-label">Cuenta</span>
     </button>
 
-    <!-- BOTÓN FLOTANTE LATERAL PARA PANEL ADMIN (INFERIOR DERECHA) -->
+    <!-- BOTÓN FLOTANTE LATERAL PARA PANEL ADMIN -->
     <button id="btn-side-admin-toggle" class="side-admin-btn" title="Abrir Panel de Administración"></button>
 
     <!-- PANEL ADMIN LATERAL (DRAWER / OVERLAY) -->
     <aside id="admin-panel-sidebar" class="admin-sidebar hidden">
         <div class="admin-sidebar-header">
             <h3>Modo Administrador</h3>
-            <button id="btn-close-admin-sidebar" class="btn-close-sidebar">&times;</button>
+            <button id="btn-close-admin-sidebar" class="btn-close-sidebar" title="Cerrar"></button>
         </div>
-
+        
         <div class="admin-sidebar-content">
             <div class="admin-section">
                 <h3>Gestor de Textos e Información</h3>
@@ -98,25 +84,25 @@
                     <option value="tab_search_desc">Pestaña Buscador: Placeholder</option>
                 </select>
 
-                <textarea id="admin-info-text" placeholder="Escribe el nuevo texto..." style="width:100%; min-height:80px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid var(--border-subtle); padding:0.8rem; margin-bottom:12px;"></textarea>
+                <textarea id="admin-info-text" placeholder="Escribe el nuevo texto..." style="width:100%; min-height:85px; padding:0.8rem; margin-bottom:12px;"></textarea>
 
-                <div style="display:flex; gap:8px;">
-                    <button class="btn-action" id="btn-admin-info-save">Guardar Cambios</button>
-                    <button class="btn-action btn-secondary" id="btn-admin-info-reset">Restablecer</button>
-                    <button class="btn-action btn-danger" id="btn-admin-info-clear">Vaciar Texto</button>
+                <div class="admin-actions-grid">
+                    <button class="btn-action btn-full-row" id="btn-admin-info-save">Guardar</button>
+                    <button class="btn-action btn-secondary" id="btn-admin-info-reset">Reiniciar</button>
+                    <button class="btn-action btn-danger" id="btn-admin-info-clear">Vaciar</button>
                 </div>
             </div>
 
             <div class="admin-section">
                 <h3>Gestión de Usuarios</h3>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <input type="text" id="admin-user-id" placeholder="ID de Usuario" style="width:50%;">
-                    <input type="text" id="admin-user-name" placeholder="Nombre Actual" style="width:50%;">
+                    <input type="text" id="admin-user-id" placeholder="ID Usuario" style="width:50%;">
+                    <input type="text" id="admin-user-name" placeholder="Nombre" style="width:50%;">
                 </div>
                 
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
                     <input type="text" id="admin-user-country" placeholder="País (ej: México)" style="width:50%;">
-                    <input type="text" id="admin-user-oldnames" placeholder="Nombres antiguos (sep. por coma)" style="width:50%;">
+                    <input type="text" id="admin-user-oldnames" placeholder="Alias antiguos" style="width:50%;">
                 </div>
 
                 <div style="margin-bottom:12px;">
@@ -128,13 +114,13 @@
                     </select>
                 </div>
 
-                <button class="btn-action" id="btn-admin-save-user">Guardar / Crear Usuario</button>
+                <button class="btn-action" id="btn-admin-save-user">Guardar Usuario</button>
             </div>
 
             <div class="admin-section">
                 <h3>Agregar Registro Histórico</h3>
-                <input type="text" id="add-record-userid" placeholder="ID de Usuario" style="margin-bottom:8px; width:100%;">
-                <input type="text" id="add-record-username" placeholder="Username en ese momento" style="margin-bottom:8px; width:100%;">
+                <input type="text" id="add-record-userid" placeholder="ID Usuario" style="margin-bottom:8px; width:100%;">
+                <input type="text" id="add-record-username" placeholder="Nombre en ese momento" style="margin-bottom:8px; width:100%;">
 
                 <div style="margin-bottom:8px;">
                     <label style="font-size:0.85rem; color:var(--text-muted);">Rol Obtenido:</label>
@@ -153,7 +139,9 @@
         </div>
     </aside>
 
+    <!-- CONTENEDOR PRINCIPAL -->
     <main class="main-content">
+
         <!-- PESTAÑA: GATEKEEPERS -->
         <section id="tab-intro" class="tab-pane active">
             <article class="content-card">
@@ -183,15 +171,7 @@
         <section id="tab-fechas" class="tab-pane">
             <article class="content-card">
                 <h2>Fechas</h2>
-                <p id="desc-fechas">Historial cronológico estructurado por Años, Meses y Días. Utiliza el botón interactivo para filtrar entre ascensos, descensos o ver el registro completo.</p>
-                <select id="select-dates-order" style="margin-bottom: 10px;">
-                    <option value="desc">Más reciente a más antiguo</option>
-                    <option value="asc">Más antiguo a más reciente</option>
-                </select>
-                <button id="btn-toggle-fechas-mode" class="filter-btn-toggle">
-                    <span id="img-toggle-fechas-slot"></span>
-                    <span id="label-toggle-fechas">Ver solo Ascensos</span>
-                </button>
+                <p id="desc-fechas">Historial cronológico estructurado por Años, Meses y Días. Utiliza los controles de la barra inferior para filtrar por año, tipo o alternar el orden temporal.</p>
             </article>
 
             <div id="fechas-timeline-container"></div>
@@ -276,12 +256,21 @@
                         <option value="light">Modo Claro</option>
                     </select>
                 </div>
+
+                <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle);">
+                    <label style="font-family: var(--font-gd); font-size: 0.9rem; color: var(--text-pure); display: block; margin-bottom: 8px;">
+                        Efectos Visuales:
+                    </label>
+                    <label style="display: inline-flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="toggle-particles" checked style="width: auto; cursor: pointer; accent-color: #9ae61c;">
+                        <span style="font-size: 0.92rem; color: var(--text-main);">Habilitar partículas de fondo</span>
+                    </label>
+                </div>
             </article>
         </section>
 
         <!-- PESTAÑA: CUENTA / PERFIL -->
         <section id="tab-cuenta" class="tab-pane">
-            <!-- Formulario de Login -->
             <article id="account-login-view" class="content-card" style="max-width: 460px; margin: 1rem auto;">
                 <h2>Acceso de Cuenta</h2>
                 <p style="margin-bottom: 1.2rem;">Inicia sesión para gestionar el historial o acceder a funciones de tu rol.</p>
@@ -302,7 +291,6 @@
                 </div>
             </article>
 
-            <!-- Vista de Perfil Activo -->
             <article id="account-profile-view" class="content-card hidden" style="max-width: 520px; margin: 1rem auto;">
                 <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 1.2rem;">
                     <div id="profile-avatar-slot"></div>
@@ -353,7 +341,7 @@
 
             <div class="modal-actions">
                 <button class="btn-action" id="btn-modal-save-user-edit">Guardar Cambios</button>
-                <button class="btn-action btn-secondary" id="btn-modal-cancel-user-edit">Cancelar</button>
+                <button class="btn-action btn-danger" id="btn-modal-cancel-user-edit">Cancelar</button>
             </div>
         </div>
     </div>
@@ -389,12 +377,12 @@
 
             <div class="modal-actions">
                 <button class="btn-action" id="btn-modal-save-edit">Guardar Cambios</button>
-                <button class="btn-action btn-secondary" id="btn-modal-cancel-edit">Cancelar</button>
+                <button class="btn-action btn-danger" id="btn-modal-cancel-edit">Cancelar</button>
             </div>
         </div>
     </div>
 
-    <!-- CARGA MODULAR V1.7 -->
+    <!-- CARGA MODULAR -->
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
